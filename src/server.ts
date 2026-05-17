@@ -2,7 +2,8 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { extname, isAbsolute, join, relative, resolve } from "node:path";
 import { Readable } from "node:stream";
-import { auth } from "./auth.ts";
+import { getMigrations } from "better-auth/db/migration";
+import { auth, authOptions } from "./auth.ts";
 
 const PORT = Number(process.env.PORT ?? 3000);
 const DIST_DIR = resolve(process.cwd(), "dist");
@@ -123,6 +124,13 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
+  try {
+    const { runMigrations } = await getMigrations(authOptions);
+    await runMigrations();
+  } catch (err) {
+    console.error("[server] failed to run auth migrations", err);
+    process.exit(1);
+  }
   console.log(`cozycasa server listening on http://localhost:${PORT}`);
 });
