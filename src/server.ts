@@ -1,6 +1,6 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { createReadStream, existsSync, statSync } from "node:fs";
-import { extname, join, resolve, sep } from "node:path";
+import { extname, isAbsolute, join, relative, resolve } from "node:path";
 import { Readable } from "node:stream";
 import { auth } from "./auth.ts";
 
@@ -83,13 +83,16 @@ function serveStatic(req: IncomingMessage, res: ServerResponse): boolean {
   // Strip leading slashes/backslashes so join treats it as relative to DIST_DIR.
   const rel = urlPath.replace(/^[\\/]+/, "");
   const candidate = resolve(DIST_DIR, rel);
-  const distWithSep = DIST_DIR.endsWith(sep) ? DIST_DIR : DIST_DIR + sep;
-  if (candidate !== DIST_DIR && !candidate.startsWith(distWithSep)) {
+  // CodeQL-recognized path-traversal sanitizer: ensure the candidate is inside DIST_DIR.
+  const relFromDist = relative(DIST_DIR, candidate);
+  if (relFromDist.startsWith("..") || isAbsolute(relFromDist)) {
     res.statusCode = 403;
     res.end("Forbidden");
     return true;
   }
-  let filePath = candidate;
+  // Always re-join from the trusted base using the validated relative segment.
+  const safePath = relFromDist === "" ? DIST_DIR : join(DIST_DIR, relFromDist);
+  let filePath = safePath;
   if (!existsSync(filePath) || statSync(filePath).isDirectory()) {
     filePath = join(DIST_DIR, "index.html");
     if (!existsSync(filePath)) return false;
