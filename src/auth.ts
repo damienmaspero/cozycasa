@@ -1,8 +1,8 @@
-import { betterAuth } from "better-auth";
+import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { organization } from "better-auth/plugins";
 import { db } from "./db.ts";
 
-export const auth = betterAuth({
+export const authOptions: BetterAuthOptions = {
   database: db,
   baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
   secret: process.env.BETTER_AUTH_SECRET,
@@ -19,4 +19,6 @@ export const auth = betterAuth({
       },
     }),
   ],
-});
+};
+
+export const auth = betterAuth(authOptions);
