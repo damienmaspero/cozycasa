@@ -124,13 +124,14 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, async () => {
-  try {
-    const { runMigrations } = await getMigrations(authOptions);
-    await runMigrations();
-  } catch (err) {
-    console.error("[server] failed to run auth migrations", err);
-    process.exit(1);
-  }
+try {
+  const { runMigrations } = await getMigrations(authOptions);
+  await runMigrations();
+} catch (err) {
+  console.error("[server] failed to run auth migrations", err);
+  process.exit(1);
+}
+
+server.listen(PORT, () => {
   console.log(`cozycasa server listening on http://localhost:${PORT}`);
 });
