@@ -40,4 +40,10 @@ jobs:
       - name: Install Expo Skills
         # Installs the official Expo AI agent skills from https://github.com/expo/skills
         # so they are available to future Copilot sessions working on this repo.
-        run: bunx --bun skills add expo/skills
+        #
+        # `skills add` is interactive by default and prompts the user to pick which
+        # skills to install. In CI there is no TTY, so without --yes the prompt
+        # receives no input and the CLI exits without installing anything (while
+        # still returning exit code 0, which makes the step look successful).
+        # Pass --yes to accept defaults and install all skills non-interactively.
+        run: bunx --bun skills add expo/skills --yes
