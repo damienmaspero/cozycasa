@@ -31,3 +31,13 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.2"
+
+      - name: Install Expo Skills
+        # Installs the official Expo AI agent skills from https://github.com/expo/skills
+        # so they are available to future Copilot sessions working on this repo.
+        run: bunx --bun skills add expo/skills
