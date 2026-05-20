@@ -25,3 +25,10 @@ targets alongside web.
   so it works off-DOM)
 - Storage for native sessions: `expo-secure-store` wired into better-auth's
   storage hook
+
+## PRs
+Add Expo SDK 55 deps + app.json / babel.config.js / metro.config.js / tsconfig and an empty app/_layout.tsx that builds.
+Port screens from src/web/ into app/ using RN primitives; add shared src/lib/auth-client.ts with platform-conditional storage.
+Server-side: trustedOrigins + CORS for native; no changes to src/server.ts request handling.
+Swap build scripts to expo export --platform web --output-dir dist; verify src/server.ts still serves it; verify npm run typecheck passes.
+Remove Vite (vite.config.ts, root index.html, src/web/, tsconfig.web.json, vite + @vitejs/plugin-react deps); update README.
