@@ -19,6 +19,6 @@
     "expo-env.d.ts",
     ".expo/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "dist", "src/web/**", "src/server.ts", "src/auth.ts", "src/db.ts", "vite.config.ts"]
+  "exclude": ["node_modules", "dist", "src/server.ts", "src/auth.ts", "src/db.ts"]
 }
 
