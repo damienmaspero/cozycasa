@@ -9,11 +9,10 @@
   },
   "scripts": {
     "dev:api": "node --env-file-if-exists=.env --watch src/server.ts",
-    "dev:web": "vite",
     "dev:expo": "expo start",
     "build": "expo export --platform web --output-dir dist",
     "start": "node --env-file-if-exists=.env src/server.ts",
-    "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc -p tsconfig.web.json --noEmit && tsc --noEmit"
+    "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc --noEmit"
   },
   "dependencies": {
     "better-auth": "1.6.11",
@@ -33,9 +32,7 @@
     "@types/node": "25.8.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react": "6.0.2",
     "babel-preset-expo": "~14.0.6",
-    "typescript": "6.0.3",
-    "vite": "8.0.13"
+    "typescript": "6.0.3"
   }
 }
