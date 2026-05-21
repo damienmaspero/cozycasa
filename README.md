@@ -15,7 +15,7 @@ single React Native codebase.
 - Min platforms: iOS 15.1+, Android 7 (API 24)+, Xcode 16.1+
 - `better-auth` 1.6.11 with `expo-secure-store` for native session storage
 - Node.js 24 with the native SQL API (`node:sqlite`) for the database layer
-- Node API server in `src/server.ts` (unchanged from the original SPA setup)
+- Node API server in `src/server.ts`
 
 ## Project layout
 
