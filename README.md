@@ -10,8 +10,9 @@ single React Native codebase.
 ## Scope
 
 CozyCasa is a private app for two families (mine and a friend's). There is a
-single admin (me) across both [`better-auth`][better-auth] organizations, and
-total user count is on the order of ~10. The app is **invite-only**: public
+single admin (me) across both [`better-auth`][better-auth] organizations.
+Appart from me, there is only 1 member account per family. All real people from each family are using the same respective account.
+The app is **invite-only**: public
 sign-up is disabled and members join via organization invitations.
 
 This deliberately small scope drives the operational choices below — things
