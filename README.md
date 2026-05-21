@@ -14,6 +14,7 @@ single React Native codebase.
 - New Architecture (mandatory in SDK 55)
 - Min platforms: iOS 15.1+, Android 7 (API 24)+, Xcode 16.1+
 - `better-auth` 1.6.11 with `expo-secure-store` for native session storage
+- Node.js 24 with the native SQL API (`node:sqlite`) for the database layer
 - Node API server in `src/server.ts` (unchanged from the original SPA setup)
 
 ## Project layout
@@ -34,19 +35,3 @@ single React Native codebase.
 - `npm start` — run the Node API server (serves the exported web build from
   `dist/`)
 - `npm run typecheck` — type-check the server and Expo app
-
-## Migration history
-
-The frontend was originally a Vite + React 19 SPA in `src/web/`. It was
-migrated to Expo SDK 55 in a series of PRs:
-
-1. Add Expo SDK 55 deps + `app.json` / `babel.config.cjs` / `metro.config.cjs`
-   / `tsconfig` and an empty `app/_layout.tsx` that builds.
-2. Port screens from `src/web/` into `app/` using RN primitives; add shared
-   `src/lib/auth-client.ts` with platform-conditional storage.
-3. Server-side: `trustedOrigins` + CORS for native; no changes to
-   `src/server.ts` request handling.
-4. Swap build scripts to `expo export --platform web --output-dir dist`;
-   verify `src/server.ts` still serves it; verify `npm run typecheck` passes.
-5. Remove Vite (`vite.config.ts`, root `index.html`, `src/web/`,
-   `tsconfig.web.json`, `vite` + `@vitejs/plugin-react` deps); update README.
