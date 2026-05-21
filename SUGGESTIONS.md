@@ -1,8 +1,7 @@
 # Suggestions
 
 Proposed conventions and operational practices for CozyCasa. These follow from
-the [Scope](./README.md#scope) section of the README — a private, invite-only
-app for two families with a single admin and ~10 users total. Items here
+the [Scope](./README.md#scope) section of the README. Items here
 describe the **target state**; not all are implemented yet.
 
 ## Conventions
@@ -25,8 +24,6 @@ deliberately minimal:
   message if any are missing or malformed.
 - **Seeding**: a one-shot, idempotent seed script creates the admin user and
   the two organizations on a fresh database. Re-running it should be safe.
-- **Invitations**: organization invitations should be sent via a real email
-  provider (e.g. Resend) rather than logged to the console.
 - **CI**: GitHub Actions runs `npm ci`, `npm run typecheck`, and `npm run
   build` on pull requests. There is no test suite by design; tests are added
   ad-hoc when a flow proves prone to regressions.
