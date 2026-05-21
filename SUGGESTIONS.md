@@ -18,3 +18,9 @@ deliberately minimal:
 - **CI**: GitHub Actions runs `npm ci`, `npm run typecheck`, and `npm run
   build` on pull requests. There is no test suite by design; tests are added
   ad-hoc when a flow proves prone to regressions.
+- **Deploy concurrency**: any workflow that calls `azure/webapps-deploy`
+  against the production slot should set a `concurrency` group keyed on the
+  App Service + slot, with `cancel-in-progress: false`. Kudu OneDeploy fails
+  with `Conflict (CODE: 409)` if a previous deployment is still running, and
+  cancelling mid-deploy can leave the SCM site locked, so queuing is the
+  safer choice.
