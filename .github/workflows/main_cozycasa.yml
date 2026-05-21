@@ -9,6 +9,14 @@ on:
       - main
   workflow_dispatch:
 
+# Serialize deploys to the same App Service slot. azure/webapps-deploy uses
+# Kudu OneDeploy, which returns `Conflict (CODE: 409)` if another deployment
+# is already in progress on the target slot. Queue runs instead of cancelling
+# so an in-flight OneDeploy is allowed to finish cleanly.
+concurrency:
+  group: deploy-cozycasa-production
+  cancel-in-progress: false
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest

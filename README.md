@@ -52,6 +52,11 @@ observability stacks are intentionally out of scope.
 
 - **Backups**: the SQLite database file (`node:sqlite`) lives on the server's
   persistent disk and is backed up off-box on a regular schedule.
+- **Deploys**: the `main_cozycasa.yml` workflow deploys to Azure App Service
+  via `azure/webapps-deploy@v3` (Kudu OneDeploy). Runs are serialized with a
+  `concurrency` group on the target slot so overlapping pushes cannot trigger
+  the `Conflict (CODE: 409)` Kudu returns when a previous deployment is still
+  in progress.
 
 See [`SUGGESTIONS.md`](./SUGGESTIONS.md) for proposed conventions and
 operational practices that follow from the scope above.
