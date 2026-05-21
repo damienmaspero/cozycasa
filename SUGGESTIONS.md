@@ -6,10 +6,6 @@ describe the **target state**; not all are implemented yet.
 
 ## Conventions
 
-- **Per-organization data**: every domain row carries an `organizationId`, and
-  every query filters by the active organization from the `better-auth`
-  session. This rule is worth setting up front because retrofitting it later
-  is painful.
 - **Invite-only access**: open sign-up stays disabled in `better-auth`; new
   members join via organization invitations only.
 
