@@ -47,31 +47,5 @@ observability stacks are intentionally out of scope.
   `dist/`)
 - `npm run typecheck` — type-check the server and Expo app
 
-## Conventions
-
-- **Per-organization data**: every domain row carries an `organizationId`, and
-  every query filters by the active organization from the `better-auth`
-  session. This rule is set up front because retrofitting it later is painful.
-- **Invite-only access**: open sign-up is disabled in `better-auth`; new
-  members join via organization invitations only.
-
-## Operations
-
-Because the app is small and self-hosted, operational concerns are kept
-deliberately minimal:
-
-- **Backups**: the SQLite database file (`node:sqlite`) lives on the server's
-  persistent disk. Back it up off-box on a regular schedule (e.g. nightly
-  `rsync` or upload to object storage) — this is the single most important
-  safeguard against data loss.
-- **Environment variables**: copy `.env.example` to `.env` and fill in
-  required values (`BETTER_AUTH_SECRET`, `DATABASE_URL`, base URL, etc.). The
-  server validates required env vars at boot and fails fast with a clear
-  message if any are missing or malformed.
-- **Seeding**: a one-shot, idempotent seed script creates the admin user and
-  the two organizations on a fresh database. Re-running it is safe.
-- **Invitations**: organization invitations are sent via a real email
-  provider (e.g. Resend) rather than logged to the console.
-- **CI**: GitHub Actions runs `npm ci`, `npm run typecheck`, and `npm run
-  build` on pull requests. There is no test suite by design; tests are added
-  ad-hoc when a flow proves prone to regressions.
+See [`SUGGESTIONS.md`](./SUGGESTIONS.md) for proposed conventions and
+operational practices that follow from the scope above.
