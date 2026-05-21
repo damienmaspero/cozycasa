@@ -12,7 +12,6 @@ import {
   organization,
   signIn,
   signOut,
-  signUp,
   useSession,
 } from "@/src/lib/auth-client";
 
@@ -47,10 +46,8 @@ export default function Index() {
 }
 
 function AuthForms() {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -58,17 +55,8 @@ function AuthForms() {
     setError(null);
     setBusy(true);
     try {
-      if (mode === "signup") {
-        const res = await signUp.email({
-          email,
-          password,
-          name: name || email,
-        });
-        if (res.error) setError(res.error.message ?? "Sign-up failed");
-      } else {
-        const res = await signIn.email({ email, password });
-        if (res.error) setError(res.error.message ?? "Sign-in failed");
-      }
+      const res = await signIn.email({ email, password });
+      if (res.error) setError(res.error.message ?? "Sign-in failed");
     } finally {
       setBusy(false);
     }
@@ -76,19 +64,8 @@ function AuthForms() {
 
   return (
     <View style={styles.section}>
-      <Text style={styles.h2}>{mode === "signin" ? "Sign in" : "Sign up"}</Text>
+      <Text style={styles.h2}>Sign in</Text>
       <View style={styles.form}>
-        {mode === "signup" && (
-          <View>
-            <Text style={styles.label}>Name</Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-            />
-          </View>
-        )}
         <View>
           <Text style={styles.label}>Email</Text>
           <TextInput
@@ -122,21 +99,10 @@ function AuthForms() {
           onPress={onSubmit}
           disabled={busy || !email || !password}
         >
-          <Text style={styles.buttonText}>
-            {busy ? "…" : mode === "signin" ? "Sign in" : "Sign up"}
-          </Text>
+          <Text style={styles.buttonText}>{busy ? "…" : "Sign in"}</Text>
         </Pressable>
       </View>
       {error && <Text style={styles.error}>{error}</Text>}
-      <Pressable
-        onPress={() => setMode(mode === "signin" ? "signup" : "signin")}
-      >
-        <Text style={styles.link}>
-          {mode === "signin"
-            ? "Need an account? Sign up"
-            : "Have an account? Sign in"}
-        </Text>
-      </Pressable>
     </View>
   );
 }
@@ -279,7 +245,6 @@ const styles = StyleSheet.create({
   buttonPressed: { opacity: 0.85 },
   buttonDisabled: { backgroundColor: "#aaa" },
   buttonText: { color: "#fff", fontWeight: "600" },
-  link: { color: "#0070f3", marginTop: 8 },
   error: { color: "crimson" },
   muted: { color: "#666" },
   bold: { fontWeight: "700" },
