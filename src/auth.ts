@@ -24,6 +24,7 @@ export const authOptions: BetterAuthOptions = {
   secret: process.env.BETTER_AUTH_SECRET,
   emailAndPassword: {
     enabled: true,
+    disableSignUp: true,
   },
   trustedOrigins: NATIVE_TRUSTED_ORIGINS,
   hooks: {
