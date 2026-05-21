@@ -47,5 +47,10 @@ observability stacks are intentionally out of scope.
   `dist/`)
 - `npm run typecheck` — type-check the server and Expo app
 
+## Operations
+
+- **Backups**: the SQLite database file (`node:sqlite`) lives on the server's
+  persistent disk and is backed up off-box on a regular schedule.
+
 See [`SUGGESTIONS.md`](./SUGGESTIONS.md) for proposed conventions and
 operational practices that follow from the scope above.

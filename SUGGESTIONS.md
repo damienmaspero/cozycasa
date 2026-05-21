@@ -19,10 +19,6 @@ describe the **target state**; not all are implemented yet.
 Because the app is small and self-hosted, operational concerns are kept
 deliberately minimal:
 
-- **Backups**: the SQLite database file (`node:sqlite`) lives on the server's
-  persistent disk. Back it up off-box on a regular schedule (e.g. nightly
-  `rsync` or upload to object storage) — this is the single most important
-  safeguard against data loss.
 - **Environment variables**: copy `.env.example` to `.env` and fill in
   required values (`BETTER_AUTH_SECRET`, `DATABASE_URL`, base URL, etc.). The
   server should validate required env vars at boot and fail fast with a clear
