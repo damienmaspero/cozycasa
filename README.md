@@ -7,6 +7,18 @@ single React Native codebase.
 [sdk-55]: https://expo.dev/changelog/sdk-55
 [better-auth]: https://better-auth.com
 
+## Scope
+
+CozyCasa is a private app for two families (mine and a friend's). There is a
+single admin (me) across both [`better-auth`][better-auth] organizations.
+Appart from me, there is only 1 member account per family. All real people from each family are using the same respective account.
+The app is **invite-only**: public
+sign-up is disabled and members join via organization invitations.
+
+This deliberately small scope drives the operational choices below — things
+like rate limiting, complex CI matrices, staging environments, and heavy
+observability stacks are intentionally out of scope.
+
 ## Stack
 
 - `expo` ~55, `react-native` 0.83, `react` 19.2, `react-dom` 19.2
@@ -35,3 +47,11 @@ single React Native codebase.
 - `npm start` — run the Node API server (serves the exported web build from
   `dist/`)
 - `npm run typecheck` — type-check the server and Expo app
+
+## Operations
+
+- **Backups**: the SQLite database file (`node:sqlite`) lives on the server's
+  persistent disk and is backed up off-box on a regular schedule.
+
+See [`SUGGESTIONS.md`](./SUGGESTIONS.md) for proposed conventions and
+operational practices that follow from the scope above.
