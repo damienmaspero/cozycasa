@@ -1,7 +1,7 @@
 import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { createAuthClient } from "better-auth/react";
-import { adminClient, organizationClient, usernameClient } from "better-auth/client/plugins";
+import { adminClient, organizationClient } from "better-auth/client/plugins";
 
 /**
  * Minimal async key/value storage interface used to persist the better-auth
@@ -62,7 +62,7 @@ function resolveBaseURL(): string | undefined {
 
 export const authClient = createAuthClient({
   baseURL: resolveBaseURL(),
-  plugins: [adminClient(), organizationClient(), usernameClient()],
+  plugins: [adminClient(), organizationClient()],
   fetchOptions: {
     // Include cookies on web; on native this is a no-op but keeps behaviour
     // predictable when running under react-native-web.
