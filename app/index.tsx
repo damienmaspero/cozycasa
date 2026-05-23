@@ -63,8 +63,17 @@ export default function Index() {
   );
 }
 
+type SignInMode = "username" | "email";
+
 function AuthForms() {
-  const [username, setUsername] = useState("");
+  // Username sign-in is the documented path for members (see README "Scope").
+  // The email fallback is kept available for the admin and any other legacy
+  // account that pre-dates the username plugin and therefore has no
+  // `username` value on its user row. The server still has
+  // `emailAndPassword.enabled = true` (see `src/auth.ts`), so `signIn.email`
+  // continues to work alongside `signIn.username`.
+  const [mode, setMode] = useState<SignInMode>("username");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -73,26 +82,75 @@ function AuthForms() {
     setError(null);
     setBusy(true);
     try {
-      const res = await signIn.username({ username, password });
+      const res =
+        mode === "username"
+          ? await signIn.username({ username: identifier, password })
+          : await signIn.email({ email: identifier, password });
       if (res.error) setError(res.error.message ?? "Sign-in failed");
     } finally {
       setBusy(false);
     }
   }
 
+  function switchMode(next: SignInMode) {
+    if (next === mode) return;
+    setMode(next);
+    setIdentifier("");
+    setError(null);
+  }
+
+  const isUsername = mode === "username";
+
   return (
     <View style={styles.section}>
       <Text style={styles.h2}>Sign in</Text>
       <View style={styles.form}>
+        <View style={styles.roleRow}>
+          <Pressable
+            onPress={() => switchMode("username")}
+            style={({ pressed }) => [
+              styles.rolePill,
+              isUsername && styles.rolePillSelected,
+              pressed && styles.buttonPressed,
+            ]}
+          >
+            <Text
+              style={[
+                styles.rolePillText,
+                isUsername && styles.rolePillTextSelected,
+              ]}
+            >
+              Username
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => switchMode("email")}
+            style={({ pressed }) => [
+              styles.rolePill,
+              !isUsername && styles.rolePillSelected,
+              pressed && styles.buttonPressed,
+            ]}
+          >
+            <Text
+              style={[
+                styles.rolePillText,
+                !isUsername && styles.rolePillTextSelected,
+              ]}
+            >
+              Email
+            </Text>
+          </Pressable>
+        </View>
         <View>
-          <Text style={styles.label}>Username</Text>
+          <Text style={styles.label}>{isUsername ? "Username" : "Email"}</Text>
           <TextInput
             style={styles.input}
-            value={username}
-            onChangeText={setUsername}
+            value={identifier}
+            onChangeText={setIdentifier}
             autoCapitalize="none"
-            autoComplete="username"
-            textContentType="username"
+            autoComplete={isUsername ? "username" : "email"}
+            textContentType={isUsername ? "username" : "emailAddress"}
+            keyboardType={isUsername ? "default" : "email-address"}
           />
         </View>
         <View>
@@ -114,7 +172,7 @@ function AuthForms() {
             pressed && !busy && styles.buttonPressed,
           ]}
           onPress={onSubmit}
-          disabled={busy || !username || !password}
+          disabled={busy || !identifier || !password}
         >
           <Text style={styles.buttonText}>{busy ? "…" : "Sign in"}</Text>
         </Pressable>
