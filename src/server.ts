@@ -4,6 +4,7 @@ import { extname, isAbsolute, join, relative, resolve } from "node:path";
 import { Readable } from "node:stream";
 import { getMigrations } from "better-auth/db/migration";
 import { auth, authOptions } from "./auth.ts";
+import { db } from "./db.ts";
 
 const PORT = Number(process.env.PORT ?? 3000);
 const DIST_DIR = resolve(process.cwd(), "dist");
@@ -64,6 +65,40 @@ async function sendWebResponse(webRes: Response, res: ServerResponse): Promise<v
   res.end();
 }
 
+type PublicUserRow = {
+  id: string;
+  name: string;
+  role: string | null;
+  username: string | null;
+  displayUsername: string | null;
+};
+
+function sendJson(
+  res: ServerResponse,
+  statusCode: number,
+  body: unknown,
+  headers?: Record<string, string>,
+): void {
+  res.statusCode = statusCode;
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  if (headers) {
+    for (const [key, value] of Object.entries(headers)) {
+      res.setHeader(key, value);
+    }
+  }
+  res.end(JSON.stringify(body));
+}
+
+function listPublicUsers(): PublicUserRow[] {
+  return db
+    .prepare(
+      `SELECT "id", "name", "role", "username", "displayUsername"
+       FROM "user"
+       ORDER BY COALESCE("displayUsername", "username", "name", "email") COLLATE NOCASE ASC`,
+    )
+    .all() as PublicUserRow[];
+}
+
 function serveStatic(req: IncomingMessage, res: ServerResponse): boolean {
   if (!existsSync(DIST_DIR)) return false;
   const rawPath = (req.url ?? "/").split("?")[0] ?? "/";
@@ -107,6 +142,17 @@ function serveStatic(req: IncomingMessage, res: ServerResponse): boolean {
 const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+    if (req.method === "GET" && url.pathname === "/api/debug/users") {
+      sendJson(
+        res,
+        200,
+        {
+          users: listPublicUsers(),
+        },
+        { "Cache-Control": "no-store" },
+      );
+      return;
+    }
     if (url.pathname.startsWith("/api/auth/")) {
       const webRes = await auth.handler(toWebRequest(req));
       await sendWebResponse(webRes, res);

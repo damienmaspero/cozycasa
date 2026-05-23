@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import {
+  apiBaseURL,
   authClient,
   organization,
   signIn,
@@ -17,6 +18,13 @@ import {
 } from "@/src/lib/auth-client";
 
 type Org = { id: string; name: string; slug: string };
+type PublicUser = {
+  id: string;
+  name: string;
+  role: string | null;
+  username: string | null;
+  displayUsername: string | null;
+};
 
 // Roles offered by the org "Create user" form. better-auth's default
 // organization roles are `owner`, `admin`, and `member`; we expose them all
@@ -59,6 +67,7 @@ export default function Index() {
       ) : (
         <AuthForms />
       )}
+      <PublicUsers />
     </ScrollView>
   );
 }
@@ -301,6 +310,74 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
   );
 }
 
+function PublicUsers() {
+  const [users, setUsers] = useState<PublicUser[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const endpoint = apiBaseURL
+          ? new URL("/api/debug/users", apiBaseURL).toString()
+          : "/api/debug/users";
+        const res = await fetch(endpoint, {
+          headers: { Accept: "application/json" },
+        });
+        if (!res.ok) {
+          throw new Error(`Request failed (${res.status})`);
+        }
+        const data = (await res.json()) as { users?: PublicUser[] };
+        if (!cancelled) {
+          setUsers(Array.isArray(data.users) ? data.users : []);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Failed to load users");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <View style={styles.section}>
+      <Text style={styles.h2}>Users</Text>
+      {loading ? <Text style={styles.muted}>Loading users…</Text> : null}
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {!loading && !error && users.length === 0 ? (
+        <Text style={styles.muted}>No users yet.</Text>
+      ) : null}
+      {!loading && !error && users.length > 0 ? (
+        <View style={styles.section}>
+          {users.map((user) => (
+            <View key={user.id} style={styles.userRow}>
+              <Text style={styles.bold}>{user.displayUsername ?? user.name}</Text>
+              <Text style={styles.muted}>
+                {user.username ? `@${user.username}` : "No username"}
+                {user.role ? ` • ${user.role}` : ""}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 /**
  * Admin-only form that creates a brand-new user account and adds them as a
  * member of `org` in a single submit. No invitation email is sent: the
@@ -470,6 +547,12 @@ const styles = StyleSheet.create({
   h3: { fontSize: 16, fontWeight: "600", marginTop: 8 },
   section: { gap: 12, marginBottom: 24 },
   orgRow: { gap: 8 },
+  userRow: {
+    gap: 2,
+    paddingVertical: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#ddd",
+  },
   form: { gap: 8, maxWidth: 320 },
   createUserForm: {
     borderWidth: 1,
