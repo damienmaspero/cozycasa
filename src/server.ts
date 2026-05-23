@@ -99,9 +99,9 @@ function listPublicUsers(): PublicUserRow[] {
       `SELECT "id", "name", "role", "username", "displayUsername"
        FROM "user"
        ORDER BY COALESCE("displayUsername", "username", "name") COLLATE NOCASE ASC
-       LIMIT ${MAX_PUBLIC_DEBUG_USERS}`,
+       LIMIT ?`,
     )
-    .all() as PublicUserRow[];
+    .all(MAX_PUBLIC_DEBUG_USERS) as PublicUserRow[];
 }
 
 function serveStatic(req: IncomingMessage, res: ServerResponse): boolean {

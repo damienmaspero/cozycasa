@@ -377,15 +377,15 @@ function PublicUsers() {
 
 function PublicUserRow({ user }: { user: PublicUser }) {
   const title = user.displayUsername ?? user.username ?? user.name;
-  const details = [user.username ? `@${user.username}` : "Username not set"];
+  const userDetails = [user.username ? `@${user.username}` : "Username not set"];
   if (user.role) {
-    details.push(user.role);
+    userDetails.push(user.role);
   }
 
   return (
     <View style={styles.userRow}>
       <Text style={styles.bold}>{title}</Text>
-      <Text style={styles.muted}>{details.join(" • ")}</Text>
+      <Text style={styles.muted}>{userDetails.join(" • ")}</Text>
     </View>
   );
 }
