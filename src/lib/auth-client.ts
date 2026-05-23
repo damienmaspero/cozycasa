@@ -60,8 +60,10 @@ function resolveBaseURL(): string | undefined {
   return process.env.EXPO_PUBLIC_API_URL;
 }
 
+export const apiBaseURL = resolveBaseURL();
+
 export const authClient = createAuthClient({
-  baseURL: resolveBaseURL(),
+  baseURL: apiBaseURL,
   plugins: [adminClient(), organizationClient(), usernameClient()],
   fetchOptions: {
     // Include cookies on web; on native this is a no-op but keeps behaviour
