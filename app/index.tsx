@@ -25,6 +25,7 @@ type PublicUser = {
   username: string | null;
   displayUsername: string | null;
 };
+const SHOW_PUBLIC_DEBUG_USERS = process.env.EXPO_PUBLIC_DEBUG_USERS === "true";
 
 // Roles offered by the org "Create user" form. better-auth's default
 // organization roles are `owner`, `admin`, and `member`; we expose them all
@@ -67,7 +68,7 @@ export default function Index() {
       ) : (
         <AuthForms />
       )}
-      <PublicUsers />
+      {SHOW_PUBLIC_DEBUG_USERS ? <PublicUsers /> : null}
     </ScrollView>
   );
 }
@@ -365,7 +366,9 @@ function PublicUsers() {
         <View style={styles.section}>
           {users.map((user) => (
             <View key={user.id} style={styles.userRow}>
-              <Text style={styles.bold}>{user.displayUsername ?? user.name}</Text>
+              <Text style={styles.bold}>
+                {user.displayUsername ?? user.username ?? user.name}
+              </Text>
               <Text style={styles.muted}>
                 {user.username ? `@${user.username}` : "No username"}
                 {user.role ? ` • ${user.role}` : ""}

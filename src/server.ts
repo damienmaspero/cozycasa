@@ -8,6 +8,8 @@ import { db } from "./db.ts";
 
 const PORT = Number(process.env.PORT ?? 3000);
 const DIST_DIR = resolve(process.cwd(), "dist");
+const PUBLIC_DEBUG_USERS_ENABLED =
+  process.env.EXPO_PUBLIC_DEBUG_USERS === "true";
 
 const MIME_TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
@@ -94,7 +96,7 @@ function listPublicUsers(): PublicUserRow[] {
     .prepare(
       `SELECT "id", "name", "role", "username", "displayUsername"
        FROM "user"
-       ORDER BY COALESCE("displayUsername", "username", "name", "email") COLLATE NOCASE ASC`,
+       ORDER BY COALESCE("displayUsername", "username", "name") COLLATE NOCASE ASC`,
     )
     .all() as PublicUserRow[];
 }
@@ -143,6 +145,11 @@ const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
     if (req.method === "GET" && url.pathname === "/api/debug/users") {
+      if (!PUBLIC_DEBUG_USERS_ENABLED) {
+        res.statusCode = 404;
+        res.end("Not Found");
+        return;
+      }
       sendJson(
         res,
         200,
