@@ -35,7 +35,9 @@ export default function Index() {
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.h1}>cozycasa</Text>
+      <Text testID="home-title" style={styles.h1}>
+        cozycasa
+      </Text>
       {session?.user ? (
         <SignedIn email={session.user.email} />
       ) : (

@@ -2,7 +2,9 @@ import { defineConfig, devices } from "@playwright/test";
 
 const port = 3000;
 const baseURL = `http://127.0.0.1:${port}`;
-const testSecret = "playwright-test-secret-1234567890-abcdef";
+const testSecret =
+  process.env.PLAYWRIGHT_AUTH_SECRET ??
+  "playwright-local-only-fallback-secret-1234567890";
 
 export default defineConfig({
   testDir: "./e2e",
