@@ -48,6 +48,8 @@ observability stacks are intentionally out of scope.
   `dist/`)
 - `npm run typecheck` — type-check the server and Expo app
 - `npm test` — run the Node `node:test` suite for `src/server-utils.ts` and `src/auth-cors.ts`
+- `npm run test:e2e` — run a Playwright smoke test that launches the web app and
+  asserts the home route renders the `cozycasa` heading
 
 ## Operations
 
