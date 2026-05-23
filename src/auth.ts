@@ -2,6 +2,7 @@ import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 import { admin, organization } from "better-auth/plugins";
 import { db } from "./db.ts";
+import { buildCorsHeaders } from "./auth-cors.ts";
 
 // Comma-separated list of user ids that should have unconditional admin
 // access, supplied via the `BETTER_AUTH_ADMIN_USER_IDS` env var. The
@@ -49,23 +50,17 @@ export const authOptions: BetterAuthOptions = {
     // request handling, and native clients (the target of this PR) do not
     // issue preflight requests.
     after: createAuthMiddleware(async (ctx) => {
-      const origin = ctx.request?.headers.get("origin");
-      if (!origin) return;
-      if (!ctx.context.isTrustedOrigin(origin, { allowRelativePaths: false })) {
-        return;
-      }
-      ctx.setHeader("Access-Control-Allow-Origin", origin);
-      ctx.setHeader("Access-Control-Allow-Credentials", "true");
-      // Echo the requested headers so we don't have to enumerate every header
-      // any current or future better-auth plugin might rely on.
+      const origin = ctx.request?.headers.get("origin") ?? null;
+      const isTrusted = origin
+        ? ctx.context.isTrustedOrigin(origin, { allowRelativePaths: false })
+        : false;
       const requestedHeaders =
-        ctx.request?.headers.get("access-control-request-headers");
-      ctx.setHeader(
-        "Access-Control-Allow-Headers",
-        requestedHeaders ?? "Content-Type, Authorization",
-      );
-      ctx.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-      ctx.setHeader("Vary", "Origin");
+        ctx.request?.headers.get("access-control-request-headers") ?? null;
+      const headers = buildCorsHeaders({ origin, isTrusted, requestedHeaders });
+      if (!headers) return;
+      for (const [name, value] of Object.entries(headers)) {
+        ctx.setHeader(name, value);
+      }
     }),
   },
   plugins: [
