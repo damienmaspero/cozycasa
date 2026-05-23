@@ -12,17 +12,8 @@ single React Native codebase.
 CozyCasa is a private app for two families (mine and a friend's). There is a
 single admin (me) across both [`better-auth`][better-auth] organizations.
 Appart from me, there is only 1 member account per family. All real people from each family are using the same respective account.
-The app is **invite-only**: public sign-up is disabled. The admin creates
-each member account directly from the in-app "Add user to <org>" form,
-which calls `auth.api.createUser` (admin plugin) and immediately attaches
-the new user to the chosen organization via `/organization/add-member`. No
-invitation email is sent — the admin shares the chosen username and
-password with the member out-of-band.
-
-Members sign in with a **username** (via the `better-auth` `username`
-plugin), not an email. Each account is stored with a synthetic
-`<username>@users.cozycasa.local` email that satisfies better-auth's
-unique-email constraint but is never used for delivery.
+The app is **invite-only**: public
+sign-up is disabled and members join via organization invitations.
 
 This deliberately small scope drives the operational choices below — things
 like rate limiting, complex CI matrices, staging environments, and heavy
@@ -66,3 +57,6 @@ observability stacks are intentionally out of scope.
   `concurrency` group on the target slot so overlapping pushes cannot trigger
   the `Conflict (CODE: 409)` Kudu returns when a previous deployment is still
   in progress.
+
+See [`SUGGESTIONS.md`](./SUGGESTIONS.md) for proposed conventions and
+operational practices that follow from the scope above.

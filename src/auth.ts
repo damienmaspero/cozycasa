@@ -1,6 +1,6 @@
 import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
-import { admin, organization, username } from "better-auth/plugins";
+import { admin, organization } from "better-auth/plugins";
 import { db } from "./db.ts";
 
 // Comma-separated list of user ids that should have unconditional admin
@@ -72,11 +72,6 @@ export const authOptions: BetterAuthOptions = {
     admin({
       adminUserIds,
     }),
-    // Username/password sign-in. Admins create accounts directly via
-    // `admin.createUser` (see the in-app "Create user" form), so members
-    // never need to know the synthetic email we generate for them — they
-    // sign in with the username chosen by the admin.
-    username(),
     organization({
       async sendInvitationEmail(data) {
         // Dev: just log invitations. Replace with real email provider in prod.
