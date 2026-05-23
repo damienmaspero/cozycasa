@@ -356,7 +356,9 @@ function PublicUsers() {
 
   return (
     <View style={styles.section}>
-      <Text style={styles.h2}>Users</Text>
+      <Text style={styles.h2} accessibilityRole="header">
+        Users
+      </Text>
       {loading ? <Text style={styles.muted}>Loading users…</Text> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
       {!loading && !error && users.length === 0 ? (
@@ -365,18 +367,25 @@ function PublicUsers() {
       {!loading && !error && users.length > 0 ? (
         <View style={styles.section}>
           {users.map((user) => (
-            <View key={user.id} style={styles.userRow}>
-              <Text style={styles.bold}>
-                {user.displayUsername ?? user.username ?? user.name}
-              </Text>
-              <Text style={styles.muted}>
-                {user.username ? `@${user.username}` : "No username"}
-                {user.role ? ` • ${user.role}` : ""}
-              </Text>
-            </View>
+            <PublicUserRow key={user.id} user={user} />
           ))}
         </View>
       ) : null}
+    </View>
+  );
+}
+
+function PublicUserRow({ user }: { user: PublicUser }) {
+  const title = user.displayUsername ?? user.username ?? user.name;
+  const details = [user.username ? `@${user.username}` : "Username not set"];
+  if (user.role) {
+    details.push(user.role);
+  }
+
+  return (
+    <View style={styles.userRow}>
+      <Text style={styles.bold}>{title}</Text>
+      <Text style={styles.muted}>{details.join(" • ")}</Text>
     </View>
   );
 }

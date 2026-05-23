@@ -75,6 +75,8 @@ type PublicUserRow = {
   displayUsername: string | null;
 };
 
+const MAX_PUBLIC_DEBUG_USERS = 50;
+
 function sendJson(
   res: ServerResponse,
   statusCode: number,
@@ -96,7 +98,8 @@ function listPublicUsers(): PublicUserRow[] {
     .prepare(
       `SELECT "id", "name", "role", "username", "displayUsername"
        FROM "user"
-       ORDER BY COALESCE("displayUsername", "username", "name") COLLATE NOCASE ASC`,
+       ORDER BY COALESCE("displayUsername", "username", "name") COLLATE NOCASE ASC
+       LIMIT ${MAX_PUBLIC_DEBUG_USERS}`,
     )
     .all() as PublicUserRow[];
 }
