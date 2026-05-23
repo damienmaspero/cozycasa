@@ -13,8 +13,7 @@
     "build": "expo export --platform web --output-dir dist",
     "start": "node --env-file-if-exists=.env src/server.ts",
     "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc --noEmit",
-    "test": "node --test src/server-utils.test.ts src/auth-cors.test.ts",
-    "test:e2e": "playwright test"
+    "test": "node --test src/server-utils.test.ts src/auth-cors.test.ts"
   },
   "dependencies": {
     "better-auth": "1.6.11",
@@ -31,7 +30,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.0",
-    "@playwright/test": "^1.60.0",
     "@types/node": "25.8.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
