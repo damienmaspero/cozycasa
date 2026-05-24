@@ -37,7 +37,13 @@ export default function Index() {
     >
       <Text style={styles.h1}>cozycasa</Text>
       {session?.user ? (
-        <SignedIn email={session.user.email} />
+        (() => {
+          const u = session.user as typeof session.user & {
+            username?: string | null;
+            displayUsername?: string | null;
+          };
+          return <SignedIn label={u.displayUsername ?? u.username ?? u.email} />;
+        })()
       ) : (
         <AuthForms />
       )}
@@ -46,7 +52,7 @@ export default function Index() {
 }
 
 function AuthForms() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -55,7 +61,7 @@ function AuthForms() {
     setError(null);
     setBusy(true);
     try {
-      const res = await signIn.email({ email, password });
+      const res = await signIn.username({ username, password });
       if (res.error) setError(res.error.message ?? "Sign-in failed");
     } finally {
       setBusy(false);
@@ -67,15 +73,15 @@ function AuthForms() {
       <Text style={styles.h2}>Sign in</Text>
       <View style={styles.form}>
         <View>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>Username</Text>
           <TextInput
             style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
+            value={username}
+            onChangeText={setUsername}
             autoCapitalize="none"
-            autoComplete="email"
-            textContentType="emailAddress"
+            autoCorrect={false}
+            autoComplete="username"
+            textContentType="username"
           />
         </View>
         <View>
@@ -97,7 +103,7 @@ function AuthForms() {
             pressed && !busy && styles.buttonPressed,
           ]}
           onPress={onSubmit}
-          disabled={busy || !email || !password}
+          disabled={busy || !username || !password}
         >
           <Text style={styles.buttonText}>{busy ? "…" : "Sign in"}</Text>
         </Pressable>
@@ -107,11 +113,11 @@ function AuthForms() {
   );
 }
 
-function SignedIn({ email }: { email: string }) {
+function SignedIn({ label }: { label: string }) {
   return (
     <View style={styles.section}>
       <Text>
-        Signed in as <Text style={styles.bold}>{email}</Text>
+        Signed in as <Text style={styles.bold}>{label}</Text>
       </Text>
       <Pressable
         style={({ pressed }) => [

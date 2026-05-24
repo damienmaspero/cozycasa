@@ -1,6 +1,6 @@
 import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
-import { admin, organization } from "better-auth/plugins";
+import { admin, organization, username } from "better-auth/plugins";
 import { db } from "./db.ts";
 import { buildCorsHeaders } from "./auth-cors.ts";
 
@@ -67,6 +67,7 @@ export const authOptions: BetterAuthOptions = {
     admin({
       adminUserIds,
     }),
+    username(),
     organization({
       async sendInvitationEmail(data) {
         // Dev: just log invitations. Replace with real email provider in prod.
