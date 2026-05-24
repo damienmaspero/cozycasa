@@ -1,5 +1,3 @@
-# cozycasa
-
 An [Expo SDK 55][sdk-55] (Expo Router) app talking to a Node /
 [`better-auth`][better-auth] API server. Targets web, iOS, and Android from a
 single React Native codebase.
