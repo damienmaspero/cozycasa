@@ -56,3 +56,11 @@ observability stacks are intentionally out of scope.
   `concurrency` group on the target slot so overlapping pushes cannot trigger
   the `Conflict (CODE: 409)` Kudu returns when a previous deployment is still
   in progress.
+
+## License
+
+This project is proprietary and `UNLICENSED`. The repository is public for
+visibility only; except for the limited rights required to view it on GitHub
+and fork it within GitHub under GitHub's Terms of Service, no permission is
+granted to use, copy, modify, distribute, or create derivative works from this
+code without prior written permission from the copyright holder.

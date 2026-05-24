@@ -2,6 +2,7 @@
   "name": "cozycasa",
   "version": "0.0.1",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "main": "expo-router/entry",
   "engines": {
