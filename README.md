@@ -10,8 +10,12 @@ single React Native codebase.
 CozyCasa is a private app for two families (mine and a friend's). There is a
 single admin (me) across both [`better-auth`][better-auth] organizations.
 Appart from me, there is only 1 member account per family. All real people from each family are using the same respective account.
-The app is **invite-only**: public
-sign-up is disabled and members join via organization invitations.
+The app is **invite-only**: past the first user, public sign-up is disabled
+and members join via organization invitations. The very first sign-up is
+allowed when the `user` table is empty so the initial admin can bootstrap
+the app; every subsequent `/sign-up/email` call is rejected with the same
+`EMAIL_PASSWORD_SIGN_UP_DISABLED` error better-auth uses when sign-up is
+disabled outright.
 
 This deliberately small scope drives the operational choices below — things
 like rate limiting, complex CI matrices, staging environments, and heavy
@@ -45,7 +49,7 @@ observability stacks are intentionally out of scope.
 - `npm start` — run the Node API server (serves the exported web build from
   `dist/`)
 - `npm run typecheck` — type-check the server and Expo app
-- `npm test` — run the Node `node:test` suite for `src/server-utils.ts` and `src/auth-cors.ts`
+- `npm test` — run the Node `node:test` suite for `src/server-utils.ts`, `src/auth-cors.ts`, and `src/auth-signup-gate.ts`
 
 ## Operations
 
