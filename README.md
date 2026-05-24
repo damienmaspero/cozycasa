@@ -58,6 +58,3 @@ observability stacks are intentionally out of scope.
   `concurrency` group on the target slot so overlapping pushes cannot trigger
   the `Conflict (CODE: 409)` Kudu returns when a previous deployment is still
   in progress.
-
-See [`SUGGESTIONS.md`](./SUGGESTIONS.md) for proposed conventions and
-operational practices that follow from the scope above.
