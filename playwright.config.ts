@@ -3,6 +3,15 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = Number(process.env.PORT ?? 3000);
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;
 
+// Use a dedicated SQLite database file for each Playwright run so the
+// bootstrap sign-up gate in `src/auth-signup-gate.ts` sees an empty `user`
+// table at the start of the run (the very first sign-up is the one we want
+// to exercise in `e2e/signup-first-user.spec.ts`). The `data/` directory is
+// gitignored, and a unique path per run avoids stepping on a developer's
+// local `./data/app.db` or on previous E2E runs.
+const DATABASE_URL =
+  process.env.E2E_DATABASE_URL ?? `./data/e2e-${Date.now()}.db`;
+
 // Playwright smoke-test config: chromium-only, drives the built web app
 // served by `npm start` (which serves `dist/` via `src/server.ts`).
 export default defineConfig({
@@ -33,6 +42,13 @@ export default defineConfig({
     stderr: "pipe",
     env: {
       PORT: String(PORT),
+      DATABASE_URL,
+      // better-auth requires a secret; provide a deterministic test value so
+      // the server starts cleanly under Playwright without a `.env` file.
+      BETTER_AUTH_SECRET:
+        process.env.BETTER_AUTH_SECRET ??
+        "playwright-e2e-secret-not-for-production-use",
+      BETTER_AUTH_URL: BASE_URL,
     },
   },
 });
