@@ -3,6 +3,7 @@ import { createAuthMiddleware } from "better-auth/api";
 import { admin, organization, username } from "better-auth/plugins";
 import { db } from "./db.ts";
 import { buildCorsHeaders } from "./auth-cors.ts";
+import { assertSignUpAllowedForUserCount } from "./auth-signup-gate.ts";
 
 // Comma-separated list of user ids that should have unconditional admin
 // access, supplied via the `BETTER_AUTH_ADMIN_USER_IDS` env var. The
@@ -35,10 +36,27 @@ export const authOptions: BetterAuthOptions = {
   secret: process.env.BETTER_AUTH_SECRET,
   emailAndPassword: {
     enabled: true,
-    disableSignUp: true,
+    // Sign-up is gated by the `before` hook below instead of better-auth's
+    // built-in `disableSignUp` flag. The hook permits sign-up only when the
+    // `user` table is empty so the very first admin can bootstrap the app;
+    // afterwards it rejects with the same `EMAIL_PASSWORD_SIGN_UP_DISABLED`
+    // error that `disableSignUp: true` would produce. See README "Scope" —
+    // the app is invite-only past the first user.
+    disableSignUp: false,
   },
   trustedOrigins: NATIVE_TRUSTED_ORIGINS,
   hooks: {
+    // Bootstrap gate: allow sign-up only when there are zero users. Runs
+    // before the built-in `/sign-up/email` handler (which the `username`
+    // plugin also routes through, see
+    // `node_modules/better-auth/dist/plugins/username/index.mjs`) so a
+    // populated `user` table rejects sign-up with the same error code as
+    // better-auth's built-in `disableSignUp`.
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-up/email") return;
+      const userCount = await ctx.context.adapter.count({ model: "user" });
+      assertSignUpAllowedForUserCount(userCount);
+    }),
     // Add CORS response headers for trusted origins so the Expo web bundler
     // (and any other allowed cross-origin client) can call the auth API
     // without modifying `src/server.ts` request handling. Native iOS/Android
