@@ -41,16 +41,17 @@ test.describe.serial("first-user sign-up bootstrap", () => {
       },
     });
 
+    const status = response.status();
     expect(
-      [200, 400],
+      status === 200 || status === 400,
       `first sign-up should return 200 or disabled-signup 400; body=${await response.text()}`,
-    ).toContain(response.status());
+    ).toBeTruthy();
 
     const body = (await response.json()) as {
       user?: { id?: string; email?: string };
       token?: string | null;
     };
-    if (response.status() === 200) {
+    if (status === 200) {
       expect(body.user?.email).toBe(firstUser.email);
       expect(body.user?.id, "first sign-up should return a user id").toBeTruthy();
     } else {

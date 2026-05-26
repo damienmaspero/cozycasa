@@ -49,12 +49,19 @@ test.describe.serial("admin create-user endpoint", () => {
         Origin: AUTH_ORIGIN,
       },
     });
+    const signUpStatus = signUpRes.status();
     expect(
-      [200, 400],
+      signUpStatus === 200 || signUpStatus === 400,
       `bootstrap sign-up should return 200 or disabled-signup 400; body=${await signUpRes.text()}`,
-    ).toContain(signUpRes.status());
-    if (signUpRes.status() === 400) {
+    ).toBeTruthy();
+    if (signUpStatus === 400) {
       await expectDisabledSignUpResponse(signUpRes);
+    } else {
+      const signUpBody = (await signUpRes.json()) as {
+        user?: { id?: string; email?: string };
+      };
+      expect(signUpBody.user?.email).toBe(bootstrapUser.email);
+      expect(signUpBody.user?.id, "bootstrap sign-up should return a user id").toBeTruthy();
     }
 
     // Sign in so the request context has a valid session cookie/token.
