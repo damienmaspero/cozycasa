@@ -54,8 +54,10 @@ test.describe.serial("first-user sign-up bootstrap", () => {
     if (status === 200) {
       expect(body.user?.email).toBe(firstUser.email);
       expect(body.user?.id, "first sign-up should return a user id").toBeTruthy();
-    } else {
+    } else if (status === 400) {
       await expectDisabledSignUpResponse(response);
+    } else {
+      throw new Error(`unexpected sign-up status: ${status}`);
     }
   });
 

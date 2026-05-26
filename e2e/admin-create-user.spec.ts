@@ -56,12 +56,14 @@ test.describe.serial("admin create-user endpoint", () => {
     ).toBeTruthy();
     if (signUpStatus === 400) {
       await expectDisabledSignUpResponse(signUpRes);
-    } else {
+    } else if (signUpStatus === 200) {
       const signUpBody = (await signUpRes.json()) as {
         user?: { id?: string; email?: string };
       };
       expect(signUpBody.user?.email).toBe(bootstrapUser.email);
       expect(signUpBody.user?.id, "bootstrap sign-up should return a user id").toBeTruthy();
+    } else {
+      throw new Error(`unexpected bootstrap sign-up status: ${signUpStatus}`);
     }
 
     // Sign in so the request context has a valid session cookie/token.
