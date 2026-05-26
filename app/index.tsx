@@ -1,3 +1,4 @@
+import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -32,24 +33,27 @@ export default function Index() {
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      keyboardShouldPersistTaps="handled"
-    >
-      <Text style={styles.h1}>cozycasa</Text>
-      {session?.user ? (
-        (() => {
-          const u = session.user as typeof session.user & {
-            username?: string | null;
-            displayUsername?: string | null;
-          };
-          return <SignedIn label={u.displayUsername ?? u.username ?? u.email} />;
-        })()
-      ) : (
-        <AuthForms />
-      )}
-    </ScrollView>
+    <>
+      <Stack.Screen options={{ title: "Cozy Casa" }} />
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.h1}>Cozy Casa</Text>
+        {session?.user ? (
+          (() => {
+            const u = session.user as typeof session.user & {
+              username?: string | null;
+              displayUsername?: string | null;
+            };
+            return <SignedIn label={u.displayUsername ?? u.username ?? u.email} />;
+          })()
+        ) : (
+          <AuthForms />
+        )}
+      </ScrollView>
+    </>
   );
 }
 
