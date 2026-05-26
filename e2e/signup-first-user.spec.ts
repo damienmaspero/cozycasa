@@ -1,6 +1,5 @@
 import { expect, test } from "@playwright/test";
-
-const AUTH_ORIGIN = "http://localhost:3000";
+import { AUTH_ORIGIN, expectDisabledSignUpResponse } from "./auth-test-helpers";
 
 // The repo is invite-only past the first user, but the very first sign-up is
 // allowed so the initial admin can bootstrap the app (see README "Scope" and
@@ -13,8 +12,11 @@ const AUTH_ORIGIN = "http://localhost:3000";
 //      `EMAIL_PASSWORD_SIGN_UP_DISABLED` error better-auth uses when
 //      sign-up is disabled outright.
 //
-// `playwright.config.ts` points the server at a fresh per-run SQLite DB so
-// this spec sees a zero-user starting state.
+// `playwright.config.ts` points the server at a fresh per-run SQLite DB.
+// Since all E2E specs share one server/database process in a run, this spec
+// tolerates either state:
+//   - 200 when this file creates the bootstrap user first
+//   - 400 (disabled) when another spec already created it
 test.describe.serial("first-user sign-up bootstrap", () => {
   const firstUser = {
     email: "bootstrap-user@example.test",
@@ -47,15 +49,12 @@ test.describe.serial("first-user sign-up bootstrap", () => {
     const body = (await response.json()) as {
       user?: { id?: string; email?: string };
       token?: string | null;
-      code?: string;
-      message?: string;
     };
     if (response.status() === 200) {
       expect(body.user?.email).toBe(firstUser.email);
       expect(body.user?.id, "first sign-up should return a user id").toBeTruthy();
     } else {
-      expect(body.code).toBe("EMAIL_PASSWORD_SIGN_UP_DISABLED");
-      expect(body.message).toBe("Email and password sign up is not enabled");
+      await expectDisabledSignUpResponse(response);
     }
   });
 
@@ -69,13 +68,6 @@ test.describe.serial("first-user sign-up bootstrap", () => {
       },
     });
 
-    expect(response.status(), "second sign-up should be rejected").toBe(400);
-
-    const body = (await response.json()) as {
-      code?: string;
-      message?: string;
-    };
-    expect(body.code).toBe("EMAIL_PASSWORD_SIGN_UP_DISABLED");
-    expect(body.message).toBe("Email and password sign up is not enabled");
+    await expectDisabledSignUpResponse(response);
   });
 });

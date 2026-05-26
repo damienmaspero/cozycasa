@@ -1,6 +1,5 @@
 import { expect, test } from "@playwright/test";
-
-const AUTH_ORIGIN = "http://localhost:3000";
+import { AUTH_ORIGIN, expectDisabledSignUpResponse } from "./auth-test-helpers";
 
 // Tests for the admin POST /admin/create-user endpoint.
 //
@@ -55,12 +54,7 @@ test.describe.serial("admin create-user endpoint", () => {
       `bootstrap sign-up should return 200 or disabled-signup 400; body=${await signUpRes.text()}`,
     ).toContain(signUpRes.status());
     if (signUpRes.status() === 400) {
-      const signUpBody = (await signUpRes.json()) as {
-        code?: string;
-        message?: string;
-      };
-      expect(signUpBody.code).toBe("EMAIL_PASSWORD_SIGN_UP_DISABLED");
-      expect(signUpBody.message).toBe("Email and password sign up is not enabled");
+      await expectDisabledSignUpResponse(signUpRes);
     }
 
     // Sign in so the request context has a valid session cookie/token.
