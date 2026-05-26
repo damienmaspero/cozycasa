@@ -480,10 +480,7 @@ function CreateOrganizationMember({
         error?: { message?: string };
       };
       if (res.error) {
-        setError(
-          (res.error as { message?: string }).message ??
-            "Failed to create organization member",
-        );
+        setError(res.error.message ?? "Failed to create organization member");
         return;
       }
       setMessage(`Member "${trimmedUsername}" created for ${organizationName}`);

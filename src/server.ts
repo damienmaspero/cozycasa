@@ -8,6 +8,7 @@ import { sendWebResponse, serveStatic, toWebRequest } from "./server-utils.ts";
 
 const PORT = Number(process.env.PORT ?? 3000);
 const DIST_DIR = resolve(process.cwd(), "dist");
+const LOCAL_EMAIL_DOMAIN = "cozycasa.local";
 const ORGANIZATION_MEMBER_ROLES = new Set(["member", "admin", "owner"]);
 const JSON_BODY_LIMIT_BYTES = 16 * 1024;
 const STATUS_CODES = {
@@ -205,7 +206,7 @@ async function handleCreateOrganizationMember(
   try {
     const createdUser = await authPluginAPI.createUser({
       body: {
-        email: `${body.username.toLowerCase()}@cozycasa.local`,
+        email: `${body.username.toLowerCase()}@${LOCAL_EMAIL_DOMAIN}`,
         password: body.password,
         name: body.name ?? body.username,
         data: { username: body.username },
@@ -225,13 +226,13 @@ async function handleCreateOrganizationMember(
 
     return jsonResponse(200, { user: createdUser.user, member });
   } catch (error) {
-    const rolledBack = createdUserId
+    const cleanupSucceeded = createdUserId
       ? await rollbackCreatedUser(createdUserId, headers)
       : true;
     const message = getErrorMessage(error, "Failed to create organization member");
     return jsonResponse(getStatusCode(error), {
       error: {
-        message: rolledBack
+        message: cleanupSucceeded
           ? message
           : `${message}. The user account was created and must be removed manually.`,
       },
