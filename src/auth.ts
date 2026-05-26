@@ -71,10 +71,44 @@ export const authOptions: BetterAuthOptions = {
       }
     }),
   },
+  databaseHooks: {
+    user: {
+      create: {
+        // Bootstrap promotion: the very first sign-up is the only one allowed
+        // (see `before` hook above and README "Scope"), and that user is the
+        // initial admin. Without this hook the admin plugin's default `role`
+        // of `"user"` would stick, and the new role gating below
+        // (`allowUserToCreateOrganization` and the
+        // `/api/auth/organization/create-member` handler) would then prevent
+        // the bootstrap user from creating organizations or members,
+        // leaving the app unusable. By promoting the first user to `admin`
+        // we keep bootstrap working while everyone else (role `"user"`)
+        // remains restricted. Runs after the admin plugin's own
+        // `user.create.before` hook (root databaseHooks run last) so this
+        // override wins — see `node_modules/better-auth/dist/db/with-hooks.mjs`.
+        async before(user, ctx) {
+          if (!ctx) return;
+          const userCount = await ctx.context.adapter.count({ model: "user" });
+          if (userCount === 0) {
+            return { data: { ...user, role: "admin" } };
+          }
+        },
+      },
+    },
+  },
   plugins: [
     admin(),
     username(),
     organization({
+      // Restrict organization creation to non-`user` roles. The admin plugin's
+      // default role for new sign-ups is `"user"`; only the bootstrap user
+      // (promoted to `"admin"` above) or any explicitly elevated account is
+      // allowed to create organizations. See
+      // `node_modules/better-auth/dist/plugins/organization/routes/crud-org.mjs`
+      // for how this option is consulted.
+      allowUserToCreateOrganization(user) {
+        return isElevatedRole((user as { role?: string | null }).role);
+      },
       async sendInvitationEmail(data) {
         // Dev: just log invitations. Replace with real email provider in prod.
         console.log(
@@ -84,5 +118,14 @@ export const authOptions: BetterAuthOptions = {
     }),
   ],
 };
+
+/**
+ * Returns true when the given role is permitted to create organizations or
+ * organization members. Role `"user"` (and any missing/unknown role) is
+ * rejected; every other role (e.g. `"admin"`) is accepted.
+ */
+export function isElevatedRole(role: string | null | undefined): boolean {
+  return typeof role === "string" && role.trim() !== "" && role !== "user";
+}
 
 export const auth = betterAuth(authOptions);

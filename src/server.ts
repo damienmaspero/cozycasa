@@ -1,7 +1,7 @@
 import { createServer, type IncomingHttpHeaders, type IncomingMessage } from "node:http";
 import { resolve } from "node:path";
 import { getMigrations } from "better-auth/db/migration";
-import { auth, authOptions } from "./auth.ts";
+import { auth, authOptions, isElevatedRole } from "./auth.ts";
 import { readBootstrapStatus } from "./bootstrap-status.ts";
 import { db } from "./db.ts";
 import { sendWebResponse, serveStatic, toWebRequest } from "./server-utils.ts";
@@ -186,6 +186,36 @@ async function rollbackCreatedUser(
 async function handleCreateOrganizationMember(
   req: IncomingMessage,
 ): Promise<Response> {
+  const headers = toWebHeaders(req.headers);
+
+  // Authorization: only callers with an elevated role (i.e. not `"user"`) may
+  // create accounts. Role `"user"` is the admin plugin's default for every
+  // new sign-up (see `node_modules/better-auth/dist/plugins/admin/admin.mjs`),
+  // so without this check a regular member could create new users by hitting
+  // this endpoint directly. The bootstrap user is promoted to `"admin"` in
+  // `src/auth.ts` so they can still seed accounts.
+  let callerRole: string | null | undefined;
+  try {
+    const session = await auth.api.getSession({ headers });
+    callerRole = (session?.user as { role?: string | null } | undefined)?.role;
+    if (!session) {
+      return jsonResponse(STATUS_CODES.UNAUTHORIZED, {
+        error: { message: "Authentication required" },
+      });
+    }
+  } catch {
+    return jsonResponse(STATUS_CODES.UNAUTHORIZED, {
+      error: { message: "Authentication required" },
+    });
+  }
+  if (!isElevatedRole(callerRole)) {
+    return jsonResponse(STATUS_CODES.FORBIDDEN, {
+      error: {
+        message: "Users with role 'user' cannot create organization members",
+      },
+    });
+  }
+
   let body: CreateOrganizationMemberBody;
   try {
     body = parseCreateOrganizationMemberBody(await readJSONBody(req));
@@ -200,7 +230,6 @@ async function handleCreateOrganizationMember(
     });
   }
 
-  const headers = toWebHeaders(req.headers);
   let createdUserId: string | null = null;
 
   try {
