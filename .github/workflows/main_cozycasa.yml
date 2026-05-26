@@ -47,6 +47,26 @@ jobs:
       - name: Prune dev dependencies before deploy
         run: npm prune --omit=dev
 
+      - name: Disable remote Oryx build on App Service
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: 'cozycasa'
+          slot-name: 'Production'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2214993838554F44934AE77B7DF3FC5D }}
+          app-settings-json: |
+            [
+              {
+                "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+                "value": "false",
+                "slotSetting": false
+              },
+              {
+                "name": "ENABLE_ORYX_BUILD",
+                "value": "false",
+                "slotSetting": false
+              }
+            ]
+
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
