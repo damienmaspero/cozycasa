@@ -444,6 +444,17 @@ function Organizations() {
 
 const MEMBER_ROLES = ["member", "admin", "owner"] as const;
 type MemberRole = (typeof MEMBER_ROLES)[number];
+type CreateOrganizationMemberResponse =
+  | {
+      error: { message?: string };
+      user?: never;
+      member?: never;
+    }
+  | {
+      error?: undefined;
+      user: { id: string };
+      member: { id: string };
+    };
 
 function CreateOrganizationMember({
   organizationId,
@@ -476,9 +487,7 @@ function CreateOrganizationMember({
           role,
           ...(trimmedName ? { name: trimmedName } : {}),
         },
-      })) as {
-        error?: { message?: string };
-      };
+      })) as CreateOrganizationMemberResponse;
       if (res.error) {
         setError(res.error.message ?? "Failed to create organization member");
         return;

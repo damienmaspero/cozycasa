@@ -226,13 +226,15 @@ async function handleCreateOrganizationMember(
 
     return jsonResponse(200, { user: createdUser.user, member });
   } catch (error) {
-    const cleanupSucceeded = createdUserId
-      ? await rollbackCreatedUser(createdUserId, headers)
-      : true;
+    const cleanupNeeded = createdUserId !== null;
+    const cleanupSucceeded =
+      createdUserId === null
+        ? false
+        : await rollbackCreatedUser(createdUserId, headers);
     const message = getErrorMessage(error, "Failed to create organization member");
     return jsonResponse(getStatusCode(error), {
       error: {
-        message: cleanupSucceeded
+        message: !cleanupNeeded || cleanupSucceeded
           ? message
           : `${message}. The user account was created and must be removed manually.`,
       },
