@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { AUTH_ORIGIN, expectDisabledSignUpResponse } from "./auth-test-helpers";
 
 // The repo is invite-only past the first user, but the very first sign-up is
 // allowed so the initial admin can bootstrap the app (see README "Scope" and
@@ -11,14 +12,17 @@ import { expect, test } from "@playwright/test";
 //      `EMAIL_PASSWORD_SIGN_UP_DISABLED` error better-auth uses when
 //      sign-up is disabled outright.
 //
-// `playwright.config.ts` points the server at a fresh per-run SQLite DB so
-// this spec sees a zero-user starting state.
+// `playwright.config.ts` points the server at a fresh per-run SQLite DB.
+// Since all E2E specs share one server/database process in a run, this spec
+// tolerates either state:
+//   - 200 when this file creates the bootstrap user first
+//   - 400 (disabled) when another spec already created it
 test.describe.serial("first-user sign-up bootstrap", () => {
   const firstUser = {
-    email: "first-admin@example.test",
-    password: "first-admin-password",
-    name: "First Admin",
-    username: "firstadmin",
+    email: "bootstrap-user@example.test",
+    password: "bootstrap-user-password",
+    name: "Bootstrap User",
+    username: "bootstrapuser",
   };
   const secondUser = {
     email: "second-user@example.test",
@@ -32,19 +36,29 @@ test.describe.serial("first-user sign-up bootstrap", () => {
   }) => {
     const response = await request.post("/api/auth/sign-up/email", {
       data: firstUser,
+      headers: {
+        Origin: AUTH_ORIGIN,
+      },
     });
 
+    const status = response.status();
     expect(
-      response.status(),
-      `first sign-up should return 200; body=${await response.text()}`,
-    ).toBe(200);
+      status === 200 || status === 400,
+      `first sign-up should return 200 or disabled-signup 400; body=${await response.text()}`,
+    ).toBeTruthy();
 
     const body = (await response.json()) as {
       user?: { id?: string; email?: string };
       token?: string | null;
     };
-    expect(body.user?.email).toBe(firstUser.email);
-    expect(body.user?.id, "first sign-up should return a user id").toBeTruthy();
+    if (status === 200) {
+      expect(body.user?.email).toBe(firstUser.email);
+      expect(body.user?.id, "first sign-up should return a user id").toBeTruthy();
+    } else if (status === 400) {
+      await expectDisabledSignUpResponse(response);
+    } else {
+      throw new Error(`unexpected sign-up status: ${status}`);
+    }
   });
 
   test("subsequent sign-up is rejected with EMAIL_PASSWORD_SIGN_UP_DISABLED", async ({
@@ -52,15 +66,11 @@ test.describe.serial("first-user sign-up bootstrap", () => {
   }) => {
     const response = await request.post("/api/auth/sign-up/email", {
       data: secondUser,
+      headers: {
+        Origin: AUTH_ORIGIN,
+      },
     });
 
-    expect(response.status(), "second sign-up should be rejected").toBe(400);
-
-    const body = (await response.json()) as {
-      code?: string;
-      message?: string;
-    };
-    expect(body.code).toBe("EMAIL_PASSWORD_SIGN_UP_DISABLED");
-    expect(body.message).toBe("Email and password sign up is not enabled");
+    await expectDisabledSignUpResponse(response);
   });
 });
