@@ -21,6 +21,13 @@ import {
 type Org = { id: string; name: string; slug: string };
 type BootstrapStatus = { signUpAllowed: boolean };
 
+function resolveBootstrapStatusURL(): string | null {
+  if (typeof window !== "undefined") {
+    return "/api/bootstrap-status";
+  }
+  return apiBaseURL ? `${apiBaseURL}/api/bootstrap-status` : null;
+}
+
 export default function Index() {
   const { data: session, isPending } = useSession();
 
@@ -77,7 +84,12 @@ function AuthForms() {
 
     async function loadBootstrapStatus() {
       try {
-        const response = await fetch(`${apiBaseURL ?? ""}/api/bootstrap-status`, {
+        const url = resolveBootstrapStatusURL();
+        if (!url) {
+          setSignUpAllowed(false);
+          return;
+        }
+        const response = await fetch(url, {
           signal: controller.signal,
         });
         if (!response.ok) {
