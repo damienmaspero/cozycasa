@@ -10,10 +10,11 @@ single React Native codebase.
 CozyCasa is a private app for two families (mine and a friend's). There is a
 single admin (me) across both [`better-auth`][better-auth] organizations.
 Appart from me, there is only 1 member account per family. All real people from each family are using the same respective account.
-The app is **invite-only**: past the first user, public sign-up is disabled
-and members join via organization invitations. The very first sign-up is
-allowed when the `user` table is empty so the initial admin can bootstrap
-the app; every subsequent `/sign-up/email` call is rejected with the same
+Past the first user, public sign-up is disabled and the admin creates each
+organization member account directly with a username and password before
+adding it to the right organization. The very first sign-up is allowed when
+the `user` table is empty so the initial admin can bootstrap the app; every
+subsequent `/sign-up/email` call is rejected with the same
 `EMAIL_PASSWORD_SIGN_UP_DISABLED` error better-auth uses when sign-up is
 disabled outright.
 

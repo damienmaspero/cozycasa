@@ -11,9 +11,9 @@ export const SIGN_UP_DISABLED_ERROR = {
 
 /**
  * Returns true when sign-up should be permitted for the given user count.
- * The repo is invite-only (see README "Scope"), but the very first user must
- * be able to sign up so the app can be bootstrapped — there is no other way
- * to create the initial admin account.
+ * Public sign-up is closed after bootstrap (see README "Scope"), but the very
+ * first user must be able to sign up so the app can be bootstrapped — there is
+ * no other way to create the initial admin account.
  */
 export function isSignUpAllowedForUserCount(userCount: number): boolean {
   return userCount === 0;

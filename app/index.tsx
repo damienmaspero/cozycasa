@@ -21,6 +21,7 @@ import {
 
 type Org = { id: string; name: string; slug: string };
 type BootstrapStatus = { signUpAllowed: boolean };
+const SYNTHETIC_EMAIL_DOMAIN = "cozycasa.invalid";
 
 function resolveBootstrapStatusURL(): string | null {
   if (typeof window !== "undefined") {
@@ -67,7 +68,7 @@ export default function Index() {
 }
 
 function AuthForms() {
-  // The repo is invite-only past the first user (see README "Scope"), but the
+  // Public sign-up is closed past the first user (see README "Scope"), but the
   // very first sign-up is allowed when the `user` table is empty so the
   // initial admin can bootstrap the app. We surface a "Sign up" toggle here
   // so that bootstrap is reachable from the UI; subsequent attempts get the
@@ -226,7 +227,7 @@ function AuthForms() {
                 ? "Need to create the first account? Sign up"
                 : signUpAllowed === null
                   ? "Checking whether first-account sign-up is available…"
-                  : "Sign-in only — ask an admin for an invite"}
+                  : "Sign in only — ask an admin to create your account"}
           </Text>
         </Pressable>
       </View>
@@ -272,7 +273,7 @@ function AdminCreateUser() {
     setMessage(null);
     setBusy(true);
     try {
-      const email = `${username}@cozycasa.local`;
+      const email = `${username}@${SYNTHETIC_EMAIL_DOMAIN}`;
       const res = await authClient.$fetch("/admin/create-user", {
         method: "POST",
         body: { email, password, name: name || username, data: { username } },
@@ -398,7 +399,10 @@ function Organizations() {
               <Text>
                 {o.name} <Text style={styles.code}>({o.slug})</Text>
               </Text>
-              <InviteMember organizationId={o.id} organizationName={o.name} />
+              <CreateOrganizationMember
+                organizationId={o.id}
+                organizationName={o.name}
+              />
             </View>
           ))}
         </View>
@@ -439,65 +443,110 @@ function Organizations() {
   );
 }
 
-const INVITE_ROLES = ["member", "admin", "owner"] as const;
-type InviteRole = (typeof INVITE_ROLES)[number];
+const MEMBER_ROLES = ["member", "admin", "owner"] as const;
+type MemberRole = (typeof MEMBER_ROLES)[number];
+type CreateOrganizationMemberResponse =
+  | {
+      error: { message?: string };
+      user?: never;
+      member?: never;
+    }
+  | {
+      error?: undefined;
+      user: { id: string };
+      member: { id: string };
+    };
 
-function InviteMember({
+function CreateOrganizationMember({
   organizationId,
   organizationName,
 }: {
   organizationId: string;
   organizationName: string;
 }) {
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState<InviteRole>("member");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [role, setRole] = useState<MemberRole>("member");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  async function onInvite() {
+  async function onCreate() {
     setError(null);
     setMessage(null);
     setBusy(true);
+    const trimmedUsername = username.trim();
+    const trimmedName = name.trim();
     try {
-      const res = await organization.inviteMember({
-        email,
-        role,
-        organizationId,
-      });
+      const res = (await authClient.$fetch("/organization/create-member", {
+        method: "POST",
+        body: {
+          organizationId,
+          username: trimmedUsername,
+          password,
+          role,
+          ...(trimmedName ? { name: trimmedName } : {}),
+        },
+      })) as CreateOrganizationMemberResponse;
       if (res.error) {
-        setError(res.error.message ?? "Failed to invite member");
-      } else {
-        setMessage(`Invitation sent to ${email}`);
-        setEmail("");
+        setError(res.error.message ?? "Failed to create organization member");
+        return;
       }
+      setMessage(`Member "${trimmedUsername}" created for ${organizationName}`);
+      setUsername("");
+      setPassword("");
+      setName("");
+    } catch {
+      setError("Network error or unexpected response — please try again");
     } finally {
       setBusy(false);
     }
   }
 
-  const canSubmit = !busy && !!email;
+  const canSubmit = !busy && !!username.trim() && !!password;
 
   return (
     <View style={styles.form}>
-      <Text style={styles.h3}>Invite member to {organizationName}</Text>
+      <Text style={styles.h3}>Create member for {organizationName}</Text>
       <View>
-        <Text style={styles.label}>Email</Text>
+        <Text style={styles.label}>Username</Text>
         <TextInput
           style={styles.input}
-          value={email}
-          onChangeText={setEmail}
+          value={username}
+          onChangeText={setUsername}
           autoCapitalize="none"
           autoCorrect={false}
-          keyboardType="email-address"
-          autoComplete="email"
-          textContentType="emailAddress"
+          autoComplete="username"
+          textContentType="username"
+        />
+      </View>
+      <View>
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoCapitalize="none"
+          autoComplete="new-password"
+          textContentType="newPassword"
+        />
+      </View>
+      <View>
+        <Text style={styles.label}>Name (optional)</Text>
+        <TextInput
+          style={styles.input}
+          value={name}
+          onChangeText={setName}
+          autoComplete="name"
+          textContentType="name"
         />
       </View>
       <View>
         <Text style={styles.label}>Role</Text>
         <View style={styles.roleRow}>
-          {INVITE_ROLES.map((r) => {
+          {MEMBER_ROLES.map((r) => {
             const selected = r === role;
             return (
               <Pressable
@@ -528,10 +577,10 @@ function InviteMember({
           !canSubmit && styles.buttonDisabled,
           pressed && canSubmit && styles.buttonPressed,
         ]}
-        onPress={onInvite}
+        onPress={onCreate}
         disabled={!canSubmit}
       >
-        <Text style={styles.buttonText}>{busy ? "…" : "Invite"}</Text>
+        <Text style={styles.buttonText}>{busy ? "…" : "Create member"}</Text>
       </Pressable>
       {message && <Text style={styles.muted}>{message}</Text>}
       {error && <Text style={styles.error}>{error}</Text>}
