@@ -246,11 +246,14 @@ function Organizations() {
       {orgs.length === 0 ? (
         <Text style={styles.muted}>No organizations yet.</Text>
       ) : (
-        <View>
+        <View style={styles.orgList}>
           {orgs.map((o) => (
-            <Text key={o.id}>
-              {o.name} <Text style={styles.code}>({o.slug})</Text>
-            </Text>
+            <View key={o.id} style={styles.orgItem}>
+              <Text>
+                {o.name} <Text style={styles.code}>({o.slug})</Text>
+              </Text>
+              <InviteMember organizationId={o.id} organizationName={o.name} />
+            </View>
           ))}
         </View>
       )}
@@ -290,6 +293,106 @@ function Organizations() {
   );
 }
 
+const INVITE_ROLES = ["member", "admin", "owner"] as const;
+type InviteRole = (typeof INVITE_ROLES)[number];
+
+function InviteMember({
+  organizationId,
+  organizationName,
+}: {
+  organizationId: string;
+  organizationName: string;
+}) {
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState<InviteRole>("member");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+
+  async function onInvite() {
+    setError(null);
+    setMessage(null);
+    setBusy(true);
+    try {
+      const res = await organization.inviteMember({
+        email,
+        role,
+        organizationId,
+      });
+      if (res.error) {
+        setError(res.error.message ?? "Failed to invite member");
+      } else {
+        setMessage(`Invitation sent to ${email}`);
+        setEmail("");
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const canSubmit = !busy && !!email;
+
+  return (
+    <View style={styles.form}>
+      <Text style={styles.h3}>Invite member to {organizationName}</Text>
+      <View>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="email-address"
+          autoComplete="email"
+          textContentType="emailAddress"
+        />
+      </View>
+      <View>
+        <Text style={styles.label}>Role</Text>
+        <View style={styles.roleRow}>
+          {INVITE_ROLES.map((r) => {
+            const selected = r === role;
+            return (
+              <Pressable
+                key={r}
+                onPress={() => setRole(r)}
+                style={({ pressed }) => [
+                  styles.roleChip,
+                  selected && styles.roleChipSelected,
+                  pressed && styles.buttonPressed,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.roleChipText,
+                    selected && styles.roleChipTextSelected,
+                  ]}
+                >
+                  {r}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+      <Pressable
+        style={({ pressed }) => [
+          styles.button,
+          !canSubmit && styles.buttonDisabled,
+          pressed && canSubmit && styles.buttonPressed,
+        ]}
+        onPress={onInvite}
+        disabled={!canSubmit}
+      >
+        <Text style={styles.buttonText}>{busy ? "…" : "Invite"}</Text>
+      </Pressable>
+      {message && <Text style={styles.muted}>{message}</Text>}
+      {error && <Text style={styles.error}>{error}</Text>}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
   content: { padding: 16, maxWidth: 640, width: "100%", alignSelf: "center" },
@@ -324,4 +427,18 @@ const styles = StyleSheet.create({
   bold: { fontWeight: "700" },
   code: { fontFamily: "monospace", color: "#555" },
   link: { color: "#0070f3", marginTop: 4 },
+  orgList: { gap: 16 },
+  orgItem: { gap: 8 },
+  roleRow: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
+  roleChip: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: "#fff",
+  },
+  roleChipSelected: { backgroundColor: "#0070f3", borderColor: "#0070f3" },
+  roleChipText: { color: "#444", fontSize: 13 },
+  roleChipTextSelected: { color: "#fff", fontWeight: "600" },
 });
