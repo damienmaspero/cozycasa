@@ -12,6 +12,7 @@ import {
   organization,
   signIn,
   signOut,
+  signUp,
   useSession,
 } from "@/src/lib/auth-client";
 
@@ -52,25 +53,51 @@ export default function Index() {
 }
 
 function AuthForms() {
+  // The repo is invite-only past the first user (see README "Scope"), but the
+  // very first sign-up is allowed when the `user` table is empty so the
+  // initial admin can bootstrap the app. We surface a "Sign up" toggle here
+  // so that bootstrap is reachable from the UI; subsequent attempts get the
+  // server's `EMAIL_PASSWORD_SIGN_UP_DISABLED` error which is shown inline.
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  const isSignUp = mode === "signup";
 
   async function onSubmit() {
     setError(null);
     setBusy(true);
     try {
-      const res = await signIn.username({ username, password });
-      if (res.error) setError(res.error.message ?? "Sign-in failed");
+      if (isSignUp) {
+        const res = await signUp.email({
+          email,
+          password,
+          name: name || username,
+          username,
+        });
+        if (res.error) setError(res.error.message ?? "Sign-up failed");
+      } else {
+        const res = await signIn.username({ username, password });
+        if (res.error) setError(res.error.message ?? "Sign-in failed");
+      }
     } finally {
       setBusy(false);
     }
   }
 
+  const canSubmit =
+    !busy &&
+    !!username &&
+    !!password &&
+    (!isSignUp || !!email);
+
   return (
     <View style={styles.section}>
-      <Text style={styles.h2}>Sign in</Text>
+      <Text style={styles.h2}>{isSignUp ? "Sign up" : "Sign in"}</Text>
       <View style={styles.form}>
         <View>
           <Text style={styles.label}>Username</Text>
@@ -84,6 +111,33 @@ function AuthForms() {
             textContentType="username"
           />
         </View>
+        {isSignUp && (
+          <>
+            <View>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="email-address"
+                autoComplete="email"
+                textContentType="emailAddress"
+              />
+            </View>
+            <View>
+              <Text style={styles.label}>Name (optional)</Text>
+              <TextInput
+                style={styles.input}
+                value={name}
+                onChangeText={setName}
+                autoComplete="name"
+                textContentType="name"
+              />
+            </View>
+          </>
+        )}
         <View>
           <Text style={styles.label}>Password</Text>
           <TextInput
@@ -92,20 +146,34 @@ function AuthForms() {
             onChangeText={setPassword}
             secureTextEntry
             autoCapitalize="none"
-            autoComplete="password"
-            textContentType="password"
+            autoComplete={isSignUp ? "new-password" : "password"}
+            textContentType={isSignUp ? "newPassword" : "password"}
           />
         </View>
         <Pressable
           style={({ pressed }) => [
             styles.button,
-            busy && styles.buttonDisabled,
-            pressed && !busy && styles.buttonPressed,
+            !canSubmit && styles.buttonDisabled,
+            pressed && canSubmit && styles.buttonPressed,
           ]}
           onPress={onSubmit}
-          disabled={busy || !username || !password}
+          disabled={!canSubmit}
         >
-          <Text style={styles.buttonText}>{busy ? "…" : "Sign in"}</Text>
+          <Text style={styles.buttonText}>
+            {busy ? "…" : isSignUp ? "Sign up" : "Sign in"}
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            setError(null);
+            setMode(isSignUp ? "signin" : "signup");
+          }}
+        >
+          <Text style={styles.link}>
+            {isSignUp
+              ? "Already have an account? Sign in"
+              : "Need to create the first account? Sign up"}
+          </Text>
         </Pressable>
       </View>
       {error && <Text style={styles.error}>{error}</Text>}
@@ -255,4 +323,5 @@ const styles = StyleSheet.create({
   muted: { color: "#666" },
   bold: { fontWeight: "700" },
   code: { fontFamily: "monospace", color: "#555" },
+  link: { color: "#0070f3", marginTop: 4 },
 });
