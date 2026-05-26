@@ -41,7 +41,7 @@ export const authOptions: BetterAuthOptions = {
     // `user` table is empty so the very first admin can bootstrap the app;
     // afterwards it rejects with the same `EMAIL_PASSWORD_SIGN_UP_DISABLED`
     // error that `disableSignUp: true` would produce. See README "Scope" —
-    // the app is invite-only past the first user.
+    // public sign-up closes after the first user.
     disableSignUp: false,
   },
   trustedOrigins: NATIVE_TRUSTED_ORIGINS,

@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { AUTH_ORIGIN, expectDisabledSignUpResponse } from "./auth-test-helpers";
 
-// The repo is invite-only past the first user, but the very first sign-up is
+// Public sign-up closes past the first user, but the very first sign-up is
 // allowed so the initial admin can bootstrap the app (see README "Scope" and
 // `src/auth-signup-gate.ts`). This spec drives the better-auth
 // `/api/auth/sign-up/email` endpoint end-to-end against the running server
