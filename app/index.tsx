@@ -21,7 +21,6 @@ import {
 
 type Org = { id: string; name: string; slug: string };
 type BootstrapStatus = { signUpAllowed: boolean };
-const SYNTHETIC_EMAIL_DOMAIN = "cozycasa.invalid";
 
 function resolveBootstrapStatusURL(): string | null {
   if (typeof window !== "undefined") {
@@ -254,99 +253,7 @@ function SignedIn({ label }: { label: string }) {
       >
         <Text style={styles.buttonText}>Sign out</Text>
       </Pressable>
-      <AdminCreateUser />
       <Organizations />
-    </View>
-  );
-}
-
-function AdminCreateUser() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-
-  async function onCreate() {
-    setError(null);
-    setMessage(null);
-    setBusy(true);
-    try {
-      const email = `${username}@${SYNTHETIC_EMAIL_DOMAIN}`;
-      const res = await authClient.$fetch("/admin/create-user", {
-        method: "POST",
-        body: { email, password, name: name || username, data: { username } },
-      });
-      if (res.error) {
-        setError(
-          (res.error as { message?: string }).message ?? "Failed to create user",
-        );
-      } else {
-        setMessage(`User "${username}" created successfully`);
-        setUsername("");
-        setPassword("");
-        setName("");
-      }
-    } catch {
-      setError("Unexpected error — please try again");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  const canSubmit = !busy && !!username && !!password;
-
-  return (
-    <View style={styles.form}>
-      <Text style={styles.h3}>Create user (admin)</Text>
-      <View>
-        <Text style={styles.label}>Username</Text>
-        <TextInput
-          style={styles.input}
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-          autoCorrect={false}
-          autoComplete="username"
-          textContentType="username"
-        />
-      </View>
-      <View>
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          autoCapitalize="none"
-          autoComplete="new-password"
-          textContentType="newPassword"
-        />
-      </View>
-      <View>
-        <Text style={styles.label}>Name (optional)</Text>
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-          autoComplete="name"
-          textContentType="name"
-        />
-      </View>
-      <Pressable
-        style={({ pressed }) => [
-          styles.button,
-          !canSubmit && styles.buttonDisabled,
-          pressed && canSubmit && styles.buttonPressed,
-        ]}
-        onPress={onCreate}
-        disabled={!canSubmit}
-      >
-        <Text style={styles.buttonText}>{busy ? "…" : "Create user"}</Text>
-      </Pressable>
-      {message && <Text style={styles.muted}>{message}</Text>}
-      {error && <Text style={styles.error}>{error}</Text>}
     </View>
   );
 }
