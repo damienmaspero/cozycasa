@@ -4,16 +4,16 @@ import { AUTH_ORIGIN, expectDisabledSignUpResponse } from "./auth-test-helpers";
 // Tests for the admin POST /admin/create-user endpoint.
 //
 // The endpoint is provided by the better-auth `admin` plugin and requires the
-// caller to be authenticated as an admin user (either via `adminUserIds` env
-// var or a session with `role: "admin"`).  The Playwright env does NOT set
-// `BETTER_AUTH_ADMIN_USER_IDS`, so:
+// caller to be authenticated as a user whose `role` column is `"admin"`.
+// The Playwright bootstrap user is created with the default `role: "user"`,
+// so:
 //
 //  - an unauthenticated request → 401 UNAUTHORIZED
 //  - a session with the default `role: "user"` → 403 FORBIDDEN
 //
 // The success path (admin creates a new user with a fake @cozycasa.local email
 // and a username) is exercised manually / via the UI by the real admin whose
-// user ID is listed in `BETTER_AUTH_ADMIN_USER_IDS` on the production server.
+// `role` is set to `"admin"` in the production database.
 
 test.describe.serial("admin create-user endpoint", () => {
   const bootstrapUser = {

@@ -5,16 +5,6 @@ import { db } from "./db.ts";
 import { buildCorsHeaders } from "./auth-cors.ts";
 import { assertSignUpAllowedForUserCount } from "./auth-signup-gate.ts";
 
-// Comma-separated list of user ids that should have unconditional admin
-// access, supplied via the `BETTER_AUTH_ADMIN_USER_IDS` env var. The
-// better-auth admin plugin treats any id in this list as an admin regardless
-// of the user's `role` column, which matches the README scope ("a single
-// admin (me) across both better-auth organizations").
-const adminUserIds = (process.env.BETTER_AUTH_ADMIN_USER_IDS ?? "")
-  .split(",")
-  .map((id) => id.trim())
-  .filter((id) => id.length > 0);
-
 // Origins trusted by better-auth in addition to `baseURL`. We add the native
 // deep-link scheme (matches `expo.scheme` in app.json) and the Expo / Metro web
 // dev server so that requests from iOS/Android and the Expo web bundler are
@@ -82,9 +72,7 @@ export const authOptions: BetterAuthOptions = {
     }),
   },
   plugins: [
-    admin({
-      adminUserIds,
-    }),
+    admin(),
     username(),
     organization({
       async sendInvitationEmail(data) {
