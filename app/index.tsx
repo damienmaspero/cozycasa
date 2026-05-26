@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import {
+  apiBaseURL,
   authClient,
   organization,
   signIn,
@@ -16,6 +17,7 @@ import {
   signUp,
   useSession,
 } from "@/src/lib/auth-client";
+import type { BootstrapStatus } from "@/src/bootstrap-status";
 
 type Org = { id: string; name: string; slug: string };
 
@@ -60,6 +62,7 @@ function AuthForms() {
   // so that bootstrap is reachable from the UI; subsequent attempts get the
   // server's `EMAIL_PASSWORD_SIGN_UP_DISABLED` error which is shown inline.
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [signUpAllowed, setSignUpAllowed] = useState<boolean | null>(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -68,6 +71,35 @@ function AuthForms() {
   const [busy, setBusy] = useState(false);
 
   const isSignUp = mode === "signup";
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadBootstrapStatus() {
+      try {
+        const response = await fetch(`${apiBaseURL ?? ""}/api/bootstrap-status`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const status = (await response.json()) as BootstrapStatus;
+        setSignUpAllowed(status.signUpAllowed);
+        if (!status.signUpAllowed) {
+          setMode("signin");
+        }
+      } catch (err) {
+        if ((err as Error).name === "AbortError") {
+          return;
+        }
+        setSignUpAllowed(false);
+      }
+    }
+
+    void loadBootstrapStatus();
+
+    return () => controller.abort();
+  }, []);
 
   async function onSubmit() {
     setError(null);
@@ -169,11 +201,16 @@ function AuthForms() {
             setError(null);
             setMode(isSignUp ? "signin" : "signup");
           }}
+          disabled={!isSignUp && signUpAllowed !== true}
         >
           <Text style={styles.link}>
             {isSignUp
               ? "Already have an account? Sign in"
-              : "Need to create the first account? Sign up"}
+              : signUpAllowed
+                ? "Need to create the first account? Sign up"
+                : signUpAllowed === null
+                  ? "Checking whether first-account sign-up is available…"
+                  : "Sign-in only — ask an admin for an invite"}
           </Text>
         </Pressable>
       </View>

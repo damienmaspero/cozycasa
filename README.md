@@ -49,7 +49,7 @@ observability stacks are intentionally out of scope.
 - `npm start` — run the Node API server (serves the exported web build from
   `dist/`)
 - `npm run typecheck` — type-check the server and Expo app
-- `npm test` — run the Node `node:test` suite for `src/server-utils.ts`, `src/auth-cors.ts`, and `src/auth-signup-gate.ts`
+- `npm test` — run the Node `node:test` suite for `src/server-utils.ts`, `src/auth-cors.ts`, `src/auth-signup-gate.ts`, and `src/bootstrap-status.ts`
 
 ## Operations
 

@@ -14,7 +14,7 @@
     "build": "expo export --platform web --output-dir dist",
     "start": "node --env-file-if-exists=.env src/server.ts",
     "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc --noEmit",
-    "test": "node --test src/server-utils.test.ts src/auth-cors.test.ts src/auth-signup-gate.test.ts",
+    "test": "node --test src/server-utils.test.ts src/auth-cors.test.ts src/auth-signup-gate.test.ts src/bootstrap-status.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install --with-deps chromium"
   },
