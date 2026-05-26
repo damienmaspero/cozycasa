@@ -8,7 +8,7 @@ import { sendWebResponse, serveStatic, toWebRequest } from "./server-utils.ts";
 
 const PORT = Number(process.env.PORT ?? 3000);
 const DIST_DIR = resolve(process.cwd(), "dist");
-const LOCAL_EMAIL_DOMAIN = "cozycasa.local";
+const SYNTHETIC_EMAIL_DOMAIN = "cozycasa.invalid";
 const ORGANIZATION_MEMBER_ROLES = new Set(["member", "admin", "owner"]);
 const JSON_BODY_LIMIT_BYTES = 16 * 1024;
 const STATUS_CODES = {
@@ -83,12 +83,12 @@ async function readJSONBody(req: IncomingMessage): Promise<unknown> {
     const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
     size += buffer.length;
     if (size > JSON_BODY_LIMIT_BYTES) {
-      throw new Error("Request body is too large");
+      throw new Error(`Request body exceeds limit of ${JSON_BODY_LIMIT_BYTES} bytes`);
     }
     chunks.push(buffer);
   }
   if (chunks.length === 0) {
-    throw new Error("Request body is required");
+    throw new Error("Request body cannot be empty");
   }
   return JSON.parse(Buffer.concat(chunks).toString("utf8")) as unknown;
 }
@@ -206,7 +206,7 @@ async function handleCreateOrganizationMember(
   try {
     const createdUser = await authPluginAPI.createUser({
       body: {
-        email: `${body.username.toLowerCase()}@${LOCAL_EMAIL_DOMAIN}`,
+        email: `${body.username.toLowerCase()}@${SYNTHETIC_EMAIL_DOMAIN}`,
         password: body.password,
         name: body.name ?? body.username,
         data: { username: body.username },

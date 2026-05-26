@@ -21,6 +21,7 @@ import {
 
 type Org = { id: string; name: string; slug: string };
 type BootstrapStatus = { signUpAllowed: boolean };
+const SYNTHETIC_EMAIL_DOMAIN = "cozycasa.invalid";
 
 function resolveBootstrapStatusURL(): string | null {
   if (typeof window !== "undefined") {
@@ -272,7 +273,7 @@ function AdminCreateUser() {
     setMessage(null);
     setBusy(true);
     try {
-      const email = `${username}@cozycasa.local`;
+      const email = `${username}@${SYNTHETIC_EMAIL_DOMAIN}`;
       const res = await authClient.$fetch("/admin/create-user", {
         method: "POST",
         body: { email, password, name: name || username, data: { username } },
@@ -497,7 +498,7 @@ function CreateOrganizationMember({
       setPassword("");
       setName("");
     } catch {
-      setError("Unexpected error — please try again");
+      setError("Network error or unexpected response — please try again");
     } finally {
       setBusy(false);
     }
