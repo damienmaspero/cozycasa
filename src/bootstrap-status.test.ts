@@ -24,7 +24,7 @@ describe("readBootstrapStatus", () => {
     try {
       const db = new DatabaseSync(join(dir, "app.db"));
       db.exec('CREATE TABLE "user" (id TEXT PRIMARY KEY)');
-      db.exec('INSERT INTO "user" (id) VALUES ("admin")');
+      db.exec("INSERT INTO \"user\" (id) VALUES ('admin')");
       assert.deepEqual(readBootstrapStatus(db), { signUpAllowed: false });
       db.close();
     } finally {

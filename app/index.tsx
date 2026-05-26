@@ -17,9 +17,9 @@ import {
   signUp,
   useSession,
 } from "@/src/lib/auth-client";
-import type { BootstrapStatus } from "@/src/bootstrap-status";
 
 type Org = { id: string; name: string; slug: string };
+type BootstrapStatus = { signUpAllowed: boolean };
 
 export default function Index() {
   const { data: session, isPending } = useSession();
