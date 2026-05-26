@@ -27,13 +27,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Node.js version
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '24.x'
+          cache: 'npm'
 
       - name: npm install, build, and test
         run: |
-          npm install
+          npm ci
           npm run build --if-present
           npm run test --if-present
 
@@ -42,6 +43,9 @@ jobs:
 
       - name: Run Playwright E2E tests
         run: npm run test:e2e
+
+      - name: Prune dev dependencies before deploy
+        run: npm prune --omit=dev
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
