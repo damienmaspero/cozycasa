@@ -19,6 +19,12 @@
     "expo-env.d.ts",
     ".expo/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "dist", "src/server.ts", "src/auth.ts", "src/db.ts"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/server.ts",
+    "src/auth.ts",
+    "src/db.ts",
+    "src/bootstrap-status.ts"
+  ]
 }
-
