@@ -226,11 +226,11 @@ async function handleCreateOrganizationMember(
 
     return jsonResponse(200, { user: createdUser.user, member });
   } catch (error) {
-    const cleanupNeeded = createdUserId !== null;
-    const cleanupSucceeded =
-      createdUserId === null
-        ? false
-        : await rollbackCreatedUser(createdUserId, headers);
+    const userIdToRollback = createdUserId;
+    const cleanupNeeded = userIdToRollback !== null;
+    const cleanupSucceeded = cleanupNeeded
+      ? await rollbackCreatedUser(userIdToRollback, headers)
+      : false;
     const message = getErrorMessage(error, "Failed to create organization member");
     return jsonResponse(getStatusCode(error), {
       error: {
