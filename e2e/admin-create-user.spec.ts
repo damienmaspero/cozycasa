@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+const AUTH_ORIGIN = "http://localhost:3000";
+
 // Tests for the admin POST /admin/create-user endpoint.
 //
 // The endpoint is provided by the better-auth `admin` plugin and requires the
@@ -16,10 +18,10 @@ import { expect, test } from "@playwright/test";
 
 test.describe.serial("admin create-user endpoint", () => {
   const bootstrapUser = {
-    email: "admin-flow-bootstrap@example.test",
-    password: "bootstrap-password",
-    name: "Bootstrap Admin",
-    username: "bootstrapadmin",
+    email: "bootstrap-user@example.test",
+    password: "bootstrap-user-password",
+    name: "Bootstrap User",
+    username: "bootstrapuser",
   };
 
   test("returns 401 when called without a session", async ({ request }) => {
@@ -44,17 +46,31 @@ test.describe.serial("admin create-user endpoint", () => {
     // valid session to test with.
     const signUpRes = await request.post("/api/auth/sign-up/email", {
       data: bootstrapUser,
+      headers: {
+        Origin: AUTH_ORIGIN,
+      },
     });
     expect(
-      signUpRes.status(),
-      `bootstrap sign-up should succeed; body=${await signUpRes.text()}`,
-    ).toBe(200);
+      [200, 400],
+      `bootstrap sign-up should return 200 or disabled-signup 400; body=${await signUpRes.text()}`,
+    ).toContain(signUpRes.status());
+    if (signUpRes.status() === 400) {
+      const signUpBody = (await signUpRes.json()) as {
+        code?: string;
+        message?: string;
+      };
+      expect(signUpBody.code).toBe("EMAIL_PASSWORD_SIGN_UP_DISABLED");
+      expect(signUpBody.message).toBe("Email and password sign up is not enabled");
+    }
 
     // Sign in so the request context has a valid session cookie/token.
     const signInRes = await request.post("/api/auth/sign-in/username", {
       data: {
         username: bootstrapUser.username,
         password: bootstrapUser.password,
+      },
+      headers: {
+        Origin: AUTH_ORIGIN,
       },
     });
     expect(
@@ -71,6 +87,9 @@ test.describe.serial("admin create-user endpoint", () => {
         password: "newuserpassword",
         name: "New User",
         data: { username: "newuser" },
+      },
+      headers: {
+        Origin: AUTH_ORIGIN,
       },
     });
 

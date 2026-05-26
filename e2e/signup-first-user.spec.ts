@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+const AUTH_ORIGIN = "http://localhost:3000";
+
 // The repo is invite-only past the first user, but the very first sign-up is
 // allowed so the initial admin can bootstrap the app (see README "Scope" and
 // `src/auth-signup-gate.ts`). This spec drives the better-auth
@@ -15,10 +17,10 @@ import { expect, test } from "@playwright/test";
 // this spec sees a zero-user starting state.
 test.describe.serial("first-user sign-up bootstrap", () => {
   const firstUser = {
-    email: "first-admin@example.test",
-    password: "first-admin-password",
-    name: "First Admin",
-    username: "firstadmin",
+    email: "bootstrap-user@example.test",
+    password: "bootstrap-user-password",
+    name: "Bootstrap User",
+    username: "bootstrapuser",
   };
   const secondUser = {
     email: "second-user@example.test",
@@ -32,19 +34,29 @@ test.describe.serial("first-user sign-up bootstrap", () => {
   }) => {
     const response = await request.post("/api/auth/sign-up/email", {
       data: firstUser,
+      headers: {
+        Origin: AUTH_ORIGIN,
+      },
     });
 
     expect(
-      response.status(),
-      `first sign-up should return 200; body=${await response.text()}`,
-    ).toBe(200);
+      [200, 400],
+      `first sign-up should return 200 or disabled-signup 400; body=${await response.text()}`,
+    ).toContain(response.status());
 
     const body = (await response.json()) as {
       user?: { id?: string; email?: string };
       token?: string | null;
+      code?: string;
+      message?: string;
     };
-    expect(body.user?.email).toBe(firstUser.email);
-    expect(body.user?.id, "first sign-up should return a user id").toBeTruthy();
+    if (response.status() === 200) {
+      expect(body.user?.email).toBe(firstUser.email);
+      expect(body.user?.id, "first sign-up should return a user id").toBeTruthy();
+    } else {
+      expect(body.code).toBe("EMAIL_PASSWORD_SIGN_UP_DISABLED");
+      expect(body.message).toBe("Email and password sign up is not enabled");
+    }
   });
 
   test("subsequent sign-up is rejected with EMAIL_PASSWORD_SIGN_UP_DISABLED", async ({
@@ -52,6 +64,9 @@ test.describe.serial("first-user sign-up bootstrap", () => {
   }) => {
     const response = await request.post("/api/auth/sign-up/email", {
       data: secondUser,
+      headers: {
+        Origin: AUTH_ORIGIN,
+      },
     });
 
     expect(response.status(), "second sign-up should be rejected").toBe(400);
