@@ -226,7 +226,7 @@ function AuthForms() {
                 ? "Need to create the first account? Sign up"
                 : signUpAllowed === null
                   ? "Checking whether first-account sign-up is available…"
-                 : "Sign-in only — ask an admin to create your account"}
+                  : "Sign in only — ask an admin to create your account"}
           </Text>
         </Pressable>
       </View>

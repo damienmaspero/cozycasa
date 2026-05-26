@@ -160,7 +160,7 @@ function getStatusCode(error: unknown): number {
     }
     if (
       typeof status === "string" &&
-      status in STATUS_CODES
+      Object.prototype.hasOwnProperty.call(STATUS_CODES, status)
     ) {
       return STATUS_CODES[status as keyof typeof STATUS_CODES];
     }
@@ -226,15 +226,14 @@ async function handleCreateOrganizationMember(
 
     return jsonResponse(200, { user: createdUser.user, member });
   } catch (error) {
-    const userIdToRollback = createdUserId;
-    const cleanupNeeded = userIdToRollback !== null;
-    const cleanupSucceeded = cleanupNeeded
-      ? await rollbackCreatedUser(userIdToRollback, headers)
-      : false;
+    let cleanupSucceeded = false;
+    if (createdUserId !== null) {
+      cleanupSucceeded = await rollbackCreatedUser(createdUserId, headers);
+    }
     const message = getErrorMessage(error, "Failed to create organization member");
     return jsonResponse(getStatusCode(error), {
       error: {
-        message: !cleanupNeeded || cleanupSucceeded
+        message: createdUserId === null || cleanupSucceeded
           ? message
           : `${message}. The user account was created and must be removed manually.`,
       },
