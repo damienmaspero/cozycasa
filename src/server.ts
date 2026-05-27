@@ -6,7 +6,12 @@ import { readBootstrapStatus } from "./bootstrap-status.ts";
 import { db } from "./db.ts";
 import { runBookingsMigrations } from "./bookings-db.ts";
 import { handleBookings } from "./bookings-handler.ts";
-import { sendWebResponse, serveStatic, toWebRequest } from "./server-utils.ts";
+import {
+  getCanonicalHostRedirect,
+  sendWebResponse,
+  serveStatic,
+  toWebRequest,
+} from "./server-utils.ts";
 
 const PORT = Number(process.env.PORT ?? 3000);
 const DIST_DIR = resolve(process.cwd(), "dist");
@@ -274,6 +279,14 @@ async function handleCreateOrganizationMember(
 
 const server = createServer(async (req, res) => {
   try {
+    const canonicalRedirect = getCanonicalHostRedirect(req);
+    if (canonicalRedirect) {
+      res.statusCode = 308;
+      res.setHeader("Location", canonicalRedirect);
+      res.end();
+      return;
+    }
+
     const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
     if (req.method === "GET" && url.pathname === "/api/bootstrap-status") {
       res.statusCode = 200;
