@@ -18,6 +18,12 @@ import {
   signUp,
   useSession,
 } from "@/src/lib/auth-client";
+import {
+  LANG_LABELS,
+  SUPPORTED_LANGS,
+  useLanguage,
+  useT,
+} from "@/src/lib/calendar/i18n";
 
 type Org = { id: string; name: string; slug: string };
 type BootstrapStatus = { signUpAllowed: boolean };
@@ -31,25 +37,29 @@ function resolveBootstrapStatusURL(): string | null {
 
 export default function Index() {
   const { data: session, isPending } = useSession();
+  const T = useT();
 
   if (isPending) {
     return (
       <View style={[styles.container, styles.center]}>
         <ActivityIndicator />
-        <Text style={styles.muted}>Loading…</Text>
+        <Text style={styles.muted}>{T.loading}</Text>
       </View>
     );
   }
 
   return (
     <>
-      <Stack.Screen options={{ title: "Cozy Casa" }} />
+      <Stack.Screen options={{ title: T.cozy_casa }} />
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.h1}>Cozy Casa</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.h1}>{T.cozy_casa}</Text>
+          <LanguageSwitcher />
+        </View>
         {session?.user ? (
           (() => {
             const u = session.user as typeof session.user & {
@@ -67,6 +77,45 @@ export default function Index() {
   );
 }
 
+function LanguageSwitcher() {
+  const { lang, setLang } = useLanguage();
+  const T = useT();
+  return (
+    <View
+      accessibilityRole="radiogroup"
+      accessibilityLabel={T.language}
+      style={styles.langRow}
+    >
+      {SUPPORTED_LANGS.map((code) => {
+        const selected = code === lang;
+        return (
+          <Pressable
+            key={code}
+            accessibilityRole="radio"
+            accessibilityState={{ selected }}
+            accessibilityLabel={LANG_LABELS[code]}
+            onPress={() => setLang(code)}
+            style={({ pressed }) => [
+              styles.langChip,
+              selected && styles.langChipSelected,
+              pressed && styles.buttonPressed,
+            ]}
+          >
+            <Text
+              style={[
+                styles.langChipText,
+                selected && styles.langChipTextSelected,
+              ]}
+            >
+              {code.toUpperCase()}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 function AuthForms() {
   // Public sign-up is closed past the first user (see README "Scope"), but the
   // very first sign-up is allowed when the `user` table is empty so the
@@ -81,6 +130,7 @@ function AuthForms() {
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const T = useT();
 
   const isSignUp = mode === "signup";
 
@@ -129,10 +179,10 @@ function AuthForms() {
           name: name || username,
           username,
         });
-        if (res.error) setError(res.error.message ?? "Sign-up failed");
+        if (res.error) setError(res.error.message ?? T.sign_up_failed);
       } else {
         const res = await signIn.username({ username, password });
-        if (res.error) setError(res.error.message ?? "Sign-in failed");
+        if (res.error) setError(res.error.message ?? T.sign_in_failed);
       }
     } finally {
       setBusy(false);
@@ -147,10 +197,10 @@ function AuthForms() {
 
   return (
     <View style={styles.section}>
-      <Text style={styles.h2}>{isSignUp ? "Sign up" : "Sign in"}</Text>
+      <Text style={styles.h2}>{isSignUp ? T.sign_up : T.sign_in}</Text>
       <View style={styles.form}>
         <View>
-          <Text style={styles.label}>Username</Text>
+          <Text style={styles.label}>{T.username}</Text>
           <TextInput
             style={styles.input}
             value={username}
@@ -164,7 +214,7 @@ function AuthForms() {
         {isSignUp && (
           <>
             <View>
-              <Text style={styles.label}>Email</Text>
+              <Text style={styles.label}>{T.email}</Text>
               <TextInput
                 style={styles.input}
                 value={email}
@@ -177,7 +227,7 @@ function AuthForms() {
               />
             </View>
             <View>
-              <Text style={styles.label}>Name (optional)</Text>
+              <Text style={styles.label}>{T.name_optional}</Text>
               <TextInput
                 style={styles.input}
                 value={name}
@@ -189,7 +239,7 @@ function AuthForms() {
           </>
         )}
         <View>
-          <Text style={styles.label}>Password</Text>
+          <Text style={styles.label}>{T.password}</Text>
           <TextInput
             style={styles.input}
             value={password}
@@ -210,7 +260,7 @@ function AuthForms() {
           disabled={!canSubmit}
         >
           <Text style={styles.buttonText}>
-            {busy ? "…" : isSignUp ? "Sign up" : "Sign in"}
+            {busy ? "…" : isSignUp ? T.sign_up : T.sign_in}
           </Text>
         </Pressable>
         <Pressable
@@ -222,12 +272,12 @@ function AuthForms() {
         >
           <Text style={styles.link}>
             {isSignUp
-              ? "Already have an account? Sign in"
+              ? T.already_have_account
               : signUpAllowed
-                ? "Need to create the first account? Sign up"
+                ? T.need_first_account
                 : signUpAllowed === null
-                  ? "Checking whether first-account sign-up is available…"
-                  : "Sign in only — ask an admin to create your account"}
+                  ? T.checking_first_account
+                  : T.sign_in_only_ask_admin}
           </Text>
         </Pressable>
       </View>
@@ -238,10 +288,11 @@ function AuthForms() {
 
 function SignedIn({ label, role }: { label: string; role?: string | null }) {
   const isAdmin = typeof role === "string" && role.trim() !== "" && role !== "user";
+  const T = useT();
   return (
     <View style={styles.section}>
       <Text>
-        Signed in as <Text style={styles.bold}>{label}</Text>
+        {T.signed_in_as} <Text style={styles.bold}>{label}</Text>
       </Text>
       <Pressable
         style={({ pressed }) => [
@@ -253,7 +304,7 @@ function SignedIn({ label, role }: { label: string; role?: string | null }) {
           void signOut();
         }}
       >
-        <Text style={styles.buttonText}>Sign out</Text>
+        <Text style={styles.buttonText}>{T.sign_out}</Text>
       </Pressable>
       <Organizations isAdmin={isAdmin} />
     </View>
@@ -262,6 +313,7 @@ function SignedIn({ label, role }: { label: string; role?: string | null }) {
 
 function Organizations({ isAdmin }: { isAdmin: boolean }) {
   const router = useRouter();
+  const T = useT();
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -286,7 +338,7 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
         slug: slug || name.toLowerCase().replace(/\s+/g, "-"),
       });
       if (res.error) {
-        setError(res.error.message ?? "Failed to create organization");
+        setError(res.error.message ?? T.failed_create_organization);
       } else {
         setName("");
         setSlug("");
@@ -299,9 +351,9 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <View style={styles.section}>
-      <Text style={styles.h2}>Organizations</Text>
+      <Text style={styles.h2}>{T.organizations}</Text>
       {orgs.length === 0 ? (
-        <Text style={styles.muted}>No organizations yet.</Text>
+        <Text style={styles.muted}>{T.no_organizations_yet}</Text>
       ) : (
         <View style={styles.orgList}>
           {orgs.map((o) => (
@@ -322,7 +374,7 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
                   pressed && styles.buttonPressed,
                 ]}
               >
-                <Text style={styles.buttonText}>Open calendar</Text>
+                <Text style={styles.buttonText}>{T.open_calendar}</Text>
               </Pressable>
               {isAdmin && (
                 <CreateOrganizationMember
@@ -336,9 +388,9 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
       )}
       {isAdmin && (
         <View style={styles.form}>
-          <Text style={styles.h3}>Create organization</Text>
+          <Text style={styles.h3}>{T.create_organization}</Text>
           <View>
-            <Text style={styles.label}>Name</Text>
+            <Text style={styles.label}>{T.name}</Text>
             <TextInput
               style={styles.input}
               value={name}
@@ -346,7 +398,7 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
             />
           </View>
           <View>
-            <Text style={styles.label}>Slug (optional)</Text>
+            <Text style={styles.label}>{T.slug_optional}</Text>
             <TextInput
               style={styles.input}
               value={slug}
@@ -363,7 +415,7 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
             onPress={onCreate}
             disabled={busy || !name}
           >
-            <Text style={styles.buttonText}>{busy ? "…" : "Create"}</Text>
+            <Text style={styles.buttonText}>{busy ? "…" : T.create}</Text>
           </Pressable>
         </View>
       )}
@@ -393,6 +445,7 @@ function CreateOrganizationMember({
   organizationId: string;
   organizationName: string;
 }) {
+  const T = useT();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -419,15 +472,15 @@ function CreateOrganizationMember({
         },
       })) as CreateOrganizationMemberResponse;
       if (res.error) {
-        setError(res.error.message ?? "Failed to create organization member");
+        setError(res.error.message ?? T.failed_create_member);
         return;
       }
-      setMessage(`Member "${trimmedUsername}" created for ${organizationName}`);
+      setMessage(T.member_created_for(trimmedUsername, organizationName));
       setUsername("");
       setPassword("");
       setName("");
     } catch {
-      setError("Network error or unexpected response — please try again");
+      setError(T.network_error_try_again);
     } finally {
       setBusy(false);
     }
@@ -437,9 +490,9 @@ function CreateOrganizationMember({
 
   return (
     <View style={styles.form}>
-      <Text style={styles.h3}>Create member for {organizationName}</Text>
+      <Text style={styles.h3}>{T.create_member_for} {organizationName}</Text>
       <View>
-        <Text style={styles.label}>Username</Text>
+        <Text style={styles.label}>{T.username}</Text>
         <TextInput
           style={styles.input}
           value={username}
@@ -451,7 +504,7 @@ function CreateOrganizationMember({
         />
       </View>
       <View>
-        <Text style={styles.label}>Password</Text>
+        <Text style={styles.label}>{T.password}</Text>
         <TextInput
           style={styles.input}
           value={password}
@@ -463,7 +516,7 @@ function CreateOrganizationMember({
         />
       </View>
       <View>
-        <Text style={styles.label}>Name (optional)</Text>
+        <Text style={styles.label}>{T.name_optional}</Text>
         <TextInput
           style={styles.input}
           value={name}
@@ -473,7 +526,7 @@ function CreateOrganizationMember({
         />
       </View>
       <View>
-        <Text style={styles.label}>Role</Text>
+        <Text style={styles.label}>{T.role}</Text>
         <View style={styles.roleRow}>
           {MEMBER_ROLES.map((r) => {
             const selected = r === role;
@@ -509,7 +562,7 @@ function CreateOrganizationMember({
         onPress={onCreate}
         disabled={!canSubmit}
       >
-        <Text style={styles.buttonText}>{busy ? "…" : "Create member"}</Text>
+        <Text style={styles.buttonText}>{busy ? "…" : T.create_member}</Text>
       </Pressable>
       {message && <Text style={styles.muted}>{message}</Text>}
       {error && <Text style={styles.error}>{error}</Text>}
@@ -522,6 +575,29 @@ const styles = StyleSheet.create({
   content: { padding: 16, maxWidth: 640, width: "100%", alignSelf: "center" },
   center: { alignItems: "center", justifyContent: "center", padding: 24 },
   h1: { fontSize: 28, fontWeight: "700", marginBottom: 16 },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    flexWrap: "wrap",
+  },
+  langRow: {
+    flexDirection: "row",
+    gap: 6,
+    marginBottom: 16,
+  },
+  langChip: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 999,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    backgroundColor: "#fff",
+  },
+  langChipSelected: { backgroundColor: "#0070f3", borderColor: "#0070f3" },
+  langChipText: { color: "#444", fontSize: 12, fontWeight: "600" },
+  langChipTextSelected: { color: "#fff" },
   h2: { fontSize: 20, fontWeight: "600", marginBottom: 12 },
   h3: { fontSize: 16, fontWeight: "600", marginTop: 8 },
   section: { gap: 12, marginBottom: 24 },

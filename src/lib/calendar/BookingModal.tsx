@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { T, nightWord } from "./i18n";
+import { nightWord, useLanguage } from "./i18n";
 import {
   DATE_INPUT_PATTERN,
   formatDate,
@@ -60,6 +60,7 @@ export default function BookingModal({
   onSubmit,
   onClose,
 }: BookingModalProps) {
+  const { lang, t: T } = useLanguage();
   const isEdit = initial.type === "edit";
   const seed = initial.booking ?? null;
 
@@ -176,7 +177,7 @@ export default function BookingModal({
         {capacityInfo.kind === "request" && (
           <>
             <Text style={styles.bold}>
-              {capacityInfo.nights} {nightWord(capacityInfo.nights)}
+              {capacityInfo.nights} {nightWord(capacityInfo.nights, lang)}
             </Text>
             <Text style={styles.info}>
               {T.request_mode_capacity_not_checked}
@@ -186,7 +187,7 @@ export default function BookingModal({
         {capacityInfo.kind === "ok" && (
           <>
             <Text style={styles.bold}>
-              {capacityInfo.nights} {nightWord(capacityInfo.nights)}
+              {capacityInfo.nights} {nightWord(capacityInfo.nights, lang)}
             </Text>
             <Text>
               <Text style={styles.bold}>{T.available_spots}:</Text>{" "}
@@ -197,7 +198,7 @@ export default function BookingModal({
         {capacityInfo.kind === "full" && (
           <>
             <Text style={styles.bold}>
-              {capacityInfo.nights} {nightWord(capacityInfo.nights)}
+              {capacityInfo.nights} {nightWord(capacityInfo.nights, lang)}
             </Text>
             <Text style={styles.error}>{T.no_spots_available}</Text>
           </>

@@ -1,5 +1,5 @@
 import { Pressable, Text, View } from "react-native";
-import { T, nightWord, personWord } from "./i18n";
+import { localeFor, nightWord, personWord, useLanguage } from "./i18n";
 import { formatDateLong, parseLocalDate } from "./dates";
 import { styles } from "./styles";
 import type { Booking } from "./types";
@@ -17,6 +17,7 @@ export default function BookingsList({
   onDelete,
   onConfirm,
 }: BookingsListProps) {
+  const { lang, t: T } = useLanguage();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const upcoming = bookings
@@ -51,10 +52,10 @@ export default function BookingsList({
                 ]}
               >
                 <Text style={styles.bookingDate}>
-                  {formatDateLong(checkIn)} → {formatDateLong(checkOut)}
+                  {formatDateLong(checkIn, localeFor(lang))} → {formatDateLong(checkOut, localeFor(lang))}
                 </Text>
                 <Text style={styles.bookingDate}>
-                  ({nights} {nightWord(nights)})
+                  ({nights} {nightWord(nights, lang)})
                 </Text>
                 {booking.is_request && (
                   <View style={styles.badge}>
@@ -64,7 +65,7 @@ export default function BookingsList({
                 <Text style={styles.bookingDetails}>
                   <Text style={styles.bookingName}>{booking.name}</Text>
                   {" — "}
-                  {booking.guests} {personWord(booking.guests)}
+                  {booking.guests} {personWord(booking.guests, lang)}
                 </Text>
                 {!!booking.comment && (
                   <Text style={styles.bookingComment}>{booking.comment}</Text>
