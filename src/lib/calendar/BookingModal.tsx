@@ -10,6 +10,7 @@ import {
 import { styles } from "./styles";
 import { HOUSE_CAPACITY, type Booking, type BookingInput } from "./types";
 import { notify } from "./dialogs";
+import DateField from "./DateField";
 
 export interface BookingModalInitial {
   type: "new" | "edit";
@@ -137,36 +138,26 @@ export default function BookingModal({
       <Text style={styles.h2}>{isEdit ? T.edit_booking : T.new_booking}</Text>
 
       <View style={styles.formGroup}>
-        <Text style={styles.label}>
-          {T.check_in_date} ({T.date_format_hint})
-        </Text>
-        <TextInput
-          style={[
-            styles.input,
-            !DATE_INPUT_PATTERN.test(checkIn) && styles.inputError,
-          ]}
+        <Text style={styles.label}>{T.check_in_date}</Text>
+        <DateField
           value={checkIn}
-          onChangeText={setCheckIn}
-          placeholder="YYYY-MM-DD"
-          autoCapitalize="none"
-          autoCorrect={false}
+          onChange={setCheckIn}
+          invalid={!DATE_INPUT_PATTERN.test(checkIn)}
         />
       </View>
 
       <View style={styles.formGroup}>
-        <Text style={styles.label}>
-          {T.check_out_date} ({T.date_format_hint})
-        </Text>
-        <TextInput
-          style={[
-            styles.input,
-            !DATE_INPUT_PATTERN.test(checkOut) && styles.inputError,
-          ]}
+        <Text style={styles.label}>{T.check_out_date}</Text>
+        <DateField
           value={checkOut}
-          onChangeText={setCheckOut}
-          placeholder="YYYY-MM-DD"
-          autoCapitalize="none"
-          autoCorrect={false}
+          onChange={setCheckOut}
+          minimumDate={(() => {
+            if (!DATE_INPUT_PATTERN.test(checkIn)) return undefined;
+            const d = parseLocalDate(checkIn);
+            d.setDate(d.getDate() + 1);
+            return d;
+          })()}
+          invalid={!DATE_INPUT_PATTERN.test(checkOut)}
         />
       </View>
 
