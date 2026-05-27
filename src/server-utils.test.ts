@@ -8,6 +8,7 @@ import { Readable } from "node:stream";
 import { connect } from "node:net";
 import { Buffer } from "node:buffer";
 import {
+  getCanonicalHostRedirect,
   MIME_TYPES,
   sendWebResponse,
   serveStatic,
@@ -222,6 +223,52 @@ describe("MIME_TYPES", () => {
 });
 
 // --- toWebRequest ---
+
+describe("getCanonicalHostRedirect", () => {
+  function makeReq(opts: {
+    url?: string;
+    headers?: Record<string, string | undefined>;
+  }): IncomingMessage {
+    const stream: IncomingMessage = Readable.from([]) as unknown as IncomingMessage;
+    (stream as unknown as { url?: string }).url = opts.url ?? "/";
+    (stream as unknown as { headers: Record<string, unknown> }).headers =
+      opts.headers ?? {};
+    return stream;
+  }
+
+  test("redirects the bare production domain to the www host", () => {
+    const req = makeReq({
+      url: "/calendar?month=5",
+      headers: { host: "thecozycasa.net" },
+    });
+
+    assert.equal(
+      getCanonicalHostRedirect(req),
+      "https://www.thecozycasa.net/calendar?month=5",
+    );
+  });
+
+  test("redirects bare domain with a port to the canonical https host", () => {
+    const req = makeReq({
+      url: "/",
+      headers: { host: "thecozycasa.net:3000" },
+    });
+
+    assert.equal(getCanonicalHostRedirect(req), "https://www.thecozycasa.net/");
+  });
+
+  test("does not redirect the canonical www domain", () => {
+    const req = makeReq({ headers: { host: "www.thecozycasa.net" } });
+
+    assert.equal(getCanonicalHostRedirect(req), null);
+  });
+
+  test("does not redirect unrelated hosts", () => {
+    const req = makeReq({ headers: { host: "localhost:3000" } });
+
+    assert.equal(getCanonicalHostRedirect(req), null);
+  });
+});
 
 describe("toWebRequest", () => {
   function makeReq(opts: {

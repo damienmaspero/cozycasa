@@ -21,6 +21,27 @@ export const MIME_TYPES: Record<string, string> = {
   ".map": "application/json; charset=utf-8",
 };
 
+const CANONICAL_HOST_REDIRECTS = new Map([
+  ["thecozycasa.net", "www.thecozycasa.net"],
+]);
+
+export function getCanonicalHostRedirect(req: IncomingMessage): string | null {
+  const rawHost = req.headers.host;
+  if (!rawHost) return null;
+
+  const hostname = rawHost.split(":")[0]?.toLowerCase();
+  if (!hostname) return null;
+
+  const canonicalHost = CANONICAL_HOST_REDIRECTS.get(hostname);
+  if (!canonicalHost) return null;
+
+  const url = new URL(req.url ?? "/", `http://${rawHost}`);
+  url.protocol = "https:";
+  url.hostname = canonicalHost;
+  url.port = "";
+  return url.toString();
+}
+
 export function toWebRequest(req: IncomingMessage, defaultPort: number): Request {
   const host = req.headers.host ?? `localhost:${defaultPort}`;
   const url = new URL(req.url ?? "/", `http://${host}`);
