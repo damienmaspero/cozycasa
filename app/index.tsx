@@ -55,8 +55,9 @@ export default function Index() {
             const u = session.user as typeof session.user & {
               username?: string | null;
               displayUsername?: string | null;
+              role?: string | null;
             };
-            return <SignedIn label={u.displayUsername ?? u.username ?? u.email} />;
+            return <SignedIn label={u.displayUsername ?? u.username ?? u.email} role={u.role} />;
           })()
         ) : (
           <AuthForms />
@@ -235,7 +236,8 @@ function AuthForms() {
   );
 }
 
-function SignedIn({ label }: { label: string }) {
+function SignedIn({ label, role }: { label: string; role?: string | null }) {
+  const isAdmin = typeof role === "string" && role.trim() !== "" && role !== "user";
   return (
     <View style={styles.section}>
       <Text>
@@ -253,12 +255,12 @@ function SignedIn({ label }: { label: string }) {
       >
         <Text style={styles.buttonText}>Sign out</Text>
       </Pressable>
-      <Organizations />
+      <Organizations isAdmin={isAdmin} />
     </View>
   );
 }
 
-function Organizations() {
+function Organizations({ isAdmin }: { isAdmin: boolean }) {
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -306,45 +308,49 @@ function Organizations() {
               <Text>
                 {o.name} <Text style={styles.code}>({o.slug})</Text>
               </Text>
-              <CreateOrganizationMember
-                organizationId={o.id}
-                organizationName={o.name}
-              />
+              {isAdmin && (
+                <CreateOrganizationMember
+                  organizationId={o.id}
+                  organizationName={o.name}
+                />
+              )}
             </View>
           ))}
         </View>
       )}
-      <View style={styles.form}>
-        <Text style={styles.h3}>Create organization</Text>
-        <View>
-          <Text style={styles.label}>Name</Text>
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-          />
+      {isAdmin && (
+        <View style={styles.form}>
+          <Text style={styles.h3}>Create organization</Text>
+          <View>
+            <Text style={styles.label}>Name</Text>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+            />
+          </View>
+          <View>
+            <Text style={styles.label}>Slug (optional)</Text>
+            <TextInput
+              style={styles.input}
+              value={slug}
+              onChangeText={setSlug}
+              autoCapitalize="none"
+            />
+          </View>
+          <Pressable
+            style={({ pressed }) => [
+              styles.button,
+              (busy || !name) && styles.buttonDisabled,
+              pressed && !busy && !!name && styles.buttonPressed,
+            ]}
+            onPress={onCreate}
+            disabled={busy || !name}
+          >
+            <Text style={styles.buttonText}>{busy ? "…" : "Create"}</Text>
+          </Pressable>
         </View>
-        <View>
-          <Text style={styles.label}>Slug (optional)</Text>
-          <TextInput
-            style={styles.input}
-            value={slug}
-            onChangeText={setSlug}
-            autoCapitalize="none"
-          />
-        </View>
-        <Pressable
-          style={({ pressed }) => [
-            styles.button,
-            (busy || !name) && styles.buttonDisabled,
-            pressed && !busy && !!name && styles.buttonPressed,
-          ]}
-          onPress={onCreate}
-          disabled={busy || !name}
-        >
-          <Text style={styles.buttonText}>{busy ? "…" : "Create"}</Text>
-        </Pressable>
-      </View>
+      )}
       {error && <Text style={styles.error}>{error}</Text>}
     </View>
   );
