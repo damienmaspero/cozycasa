@@ -1,0 +1,218 @@
+import { StyleSheet } from "react-native";
+
+// Shared StyleSheet for the calendar UI. Mirrors the visual hierarchy of the
+// legacy `public/css/style.css` (header, calendar grid, day cells, booking
+// list, modal) with React Native primitives.
+
+export const colors = {
+  primary: "#2563eb",
+  primaryDark: "#1d4ed8",
+  text: "#111827",
+  muted: "#6b7280",
+  bg: "#ffffff",
+  card: "#f9fafb",
+  border: "#e5e7eb",
+  booked: "#dbeafe",
+  request: "#fef3c7",
+  requestText: "#92400e",
+  full: "#fee2e2",
+  fullText: "#991b1b",
+  today: "#ecfdf5",
+  past: "#f3f4f6",
+  pastText: "#9ca3af",
+  danger: "#dc2626",
+  success: "#16a34a",
+  warn: "#d97706",
+};
+
+export const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.bg },
+  content: { padding: 16, gap: 16 },
+
+  // Header
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  h1: { fontSize: 22, fontWeight: "700", color: colors.text },
+  h2: { fontSize: 18, fontWeight: "600", color: colors.text, marginVertical: 8 },
+  h3: { fontSize: 16, fontWeight: "600", color: colors.text },
+
+  // Buttons
+  btn: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    backgroundColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  btnText: { color: "#fff", fontWeight: "600" },
+  btnSecondary: { backgroundColor: colors.muted },
+  btnDanger: { backgroundColor: colors.danger },
+  btnConfirm: { backgroundColor: colors.success },
+  btnNav: { backgroundColor: colors.card, paddingVertical: 8, paddingHorizontal: 12 },
+  btnNavText: { color: colors.text, fontWeight: "600" },
+  btnDisabled: { opacity: 0.5 },
+  btnPressed: { opacity: 0.85 },
+
+  // Calendar grid
+  calendarControls: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+  },
+  currentMonth: { fontSize: 18, fontWeight: "700", color: colors.text },
+  weekRow: { flexDirection: "row" },
+  weekCell: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 6,
+    color: colors.muted,
+  },
+  weekCellText: { color: colors.muted, fontWeight: "600", fontSize: 12 },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 6,
+    overflow: "hidden",
+  },
+  cell: {
+    width: `${100 / 7}%`,
+    minHeight: 88,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: colors.border,
+    padding: 4,
+    backgroundColor: colors.bg,
+  },
+  cellEmpty: { backgroundColor: colors.card },
+  cellToday: { backgroundColor: colors.today },
+  cellBooked: { backgroundColor: colors.booked },
+  cellFull: { backgroundColor: colors.full },
+  cellPast: { backgroundColor: colors.past },
+  dayNumber: { fontSize: 11, fontWeight: "600", color: colors.text },
+  dayNumberPast: { color: colors.pastText },
+  bookingMini: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 3,
+    marginTop: 2,
+  },
+  bookingMiniRequest: {
+    backgroundColor: colors.request,
+  },
+  bookingMiniText: { color: "#fff", fontSize: 10 },
+  bookingMiniRequestText: { color: colors.requestText, fontSize: 10 },
+  bookingMore: { fontSize: 10, color: colors.muted, marginTop: 2 },
+  capacityLine: { fontSize: 10, color: colors.muted, marginTop: 2 },
+
+  // Bookings list
+  bookingItem: {
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: colors.card,
+    gap: 6,
+  },
+  bookingItemRequest: { backgroundColor: colors.request },
+  bookingDate: { color: colors.muted, fontSize: 13 },
+  bookingDetails: { color: colors.text },
+  bookingName: { fontWeight: "700", color: colors.text },
+  bookingComment: { color: colors.muted, fontStyle: "italic" },
+  badge: {
+    alignSelf: "flex-start",
+    backgroundColor: colors.warn,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  badgeText: { color: "#fff", fontSize: 10, fontWeight: "700" },
+  actionsRow: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
+
+  // Modal
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    padding: 16,
+  },
+  modalContent: {
+    backgroundColor: colors.bg,
+    borderRadius: 12,
+    padding: 16,
+    maxHeight: "90%",
+    gap: 12,
+  },
+  formGroup: { gap: 6 },
+  label: { fontSize: 14, color: colors.text, fontWeight: "500" },
+  input: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 14,
+    color: colors.text,
+    backgroundColor: colors.bg,
+  },
+  inputError: { borderColor: colors.danger },
+  textarea: { minHeight: 60, textAlignVertical: "top" },
+  checkboxRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderColor: colors.border,
+    borderRadius: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxChecked: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  checkboxTick: { color: "#fff", fontSize: 14, fontWeight: "700" },
+
+  capacityInfo: {
+    padding: 10,
+    backgroundColor: colors.card,
+    borderRadius: 6,
+    gap: 4,
+  },
+  error: { color: colors.danger },
+  info: { color: colors.muted },
+  muted: { color: colors.muted },
+  bold: { fontWeight: "700" },
+
+  // FAB
+  fab: {
+    position: "absolute",
+    right: 20,
+    bottom: 20,
+    backgroundColor: colors.primary,
+    borderRadius: 28,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    gap: 6,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  fabPlus: { color: "#fff", fontSize: 20, fontWeight: "700" },
+  fabText: { color: "#fff", fontWeight: "700", fontSize: 16 },
+
+  modalActions: { flexDirection: "row", justifyContent: "flex-end", gap: 8 },
+});

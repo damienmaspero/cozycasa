@@ -4,6 +4,8 @@ import { getMigrations } from "better-auth/db/migration";
 import { auth, authOptions, isElevatedRole } from "./auth.ts";
 import { readBootstrapStatus } from "./bootstrap-status.ts";
 import { db } from "./db.ts";
+import { runBookingsMigrations } from "./bookings-db.ts";
+import { handleBookings } from "./bookings-handler.ts";
 import { sendWebResponse, serveStatic, toWebRequest } from "./server-utils.ts";
 
 const PORT = Number(process.env.PORT ?? 3000);
@@ -285,6 +287,11 @@ const server = createServer(async (req, res) => {
       await sendWebResponse(webRes, res);
       return;
     }
+    if (url.pathname === "/api/bookings" || /^\/api\/bookings\/\d+$/.test(url.pathname)) {
+      const webRes = await handleBookings(req, url);
+      await sendWebResponse(webRes, res);
+      return;
+    }
     if (url.pathname.startsWith("/api/auth/")) {
       const webRes = await auth.handler(toWebRequest(req, PORT));
       await sendWebResponse(webRes, res);
@@ -305,6 +312,7 @@ const server = createServer(async (req, res) => {
 try {
   const { runMigrations } = await getMigrations(authOptions);
   await runMigrations();
+  runBookingsMigrations(db);
 } catch (err) {
   console.error("[server] failed to run auth migrations", err);
   process.exit(1);

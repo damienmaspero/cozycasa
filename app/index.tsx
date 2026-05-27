@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { Link } from "expo-router";
 import {
   apiBaseURL,
   authClient,
@@ -308,6 +309,19 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
               <Text>
                 {o.name} <Text style={styles.code}>({o.slug})</Text>
               </Text>
+              <Link
+                href={{ pathname: "/calendar", params: { org: o.id } }}
+                asChild
+              >
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.button,
+                    pressed && styles.buttonPressed,
+                  ]}
+                >
+                  <Text style={styles.buttonText}>Open calendar</Text>
+                </Pressable>
+              </Link>
               {isAdmin && (
                 <CreateOrganizationMember
                   organizationId={o.id}
