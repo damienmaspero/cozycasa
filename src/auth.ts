@@ -10,7 +10,10 @@ import { assertSignUpAllowedForUserCount } from "./auth-signup-gate.ts";
 // dev server so that requests from iOS/Android and the Expo web bundler are
 // accepted by better-auth's origin check. Additional origins can be supplied
 // via the `BETTER_AUTH_TRUSTED_ORIGINS` env var (handled by better-auth).
-const NATIVE_TRUSTED_ORIGINS = [
+export const TRUSTED_ORIGINS = [
+  // Production web domains.
+  "https://www.thecozycasa.net",
+  "https://thecozycasa.net",
   // Native deep-link scheme.
   "cozycasa://",
   // Expo Go / dev client deep links.
@@ -34,7 +37,7 @@ export const authOptions: BetterAuthOptions = {
     // public sign-up closes after the first user.
     disableSignUp: false,
   },
-  trustedOrigins: NATIVE_TRUSTED_ORIGINS,
+  trustedOrigins: TRUSTED_ORIGINS,
   hooks: {
     // Bootstrap gate: allow sign-up only when there are zero users. Runs
     // before the built-in `/sign-up/email` handler (which the `username`

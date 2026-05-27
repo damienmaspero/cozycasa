@@ -1,6 +1,6 @@
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
-import { isElevatedRole } from "./auth.ts";
+import { isElevatedRole, TRUSTED_ORIGINS } from "./auth.ts";
 
 describe("isElevatedRole", () => {
   it("rejects the default 'user' role from the admin plugin", () => {
@@ -20,5 +20,15 @@ describe("isElevatedRole", () => {
   it("accepts 'admin' and other elevated roles", () => {
     assert.equal(isElevatedRole("admin"), true);
     assert.equal(isElevatedRole("owner"), true);
+  });
+});
+
+describe("TRUSTED_ORIGINS", () => {
+  it("trusts the canonical production web origin for cookie-backed auth requests", () => {
+    assert.ok(TRUSTED_ORIGINS.includes("https://www.thecozycasa.net"));
+  });
+
+  it("trusts the bare production web origin before canonical redirect", () => {
+    assert.ok(TRUSTED_ORIGINS.includes("https://thecozycasa.net"));
   });
 });
