@@ -25,10 +25,10 @@ describe("isElevatedRole", () => {
 
 describe("TRUSTED_ORIGINS", () => {
   it("trusts the canonical production web origin for cookie-backed auth requests", () => {
-    assert.ok(TRUSTED_ORIGINS.includes("https://www.thecozycasa.net"));
+    assert.equal(new Set(TRUSTED_ORIGINS).has("https://www.thecozycasa.net"), true);
   });
 
   it("trusts the bare production web origin before canonical redirect", () => {
-    assert.ok(TRUSTED_ORIGINS.includes("https://thecozycasa.net"));
+    assert.equal(new Set(TRUSTED_ORIGINS).has("https://thecozycasa.net"), true);
   });
 });
