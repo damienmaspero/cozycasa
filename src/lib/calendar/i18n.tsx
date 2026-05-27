@@ -16,7 +16,8 @@ import {
 
 export type Lang = "en" | "fr";
 
-export const SUPPORTED_LANGS: readonly Lang[] = ["en", "fr"] as const;
+// English is temporarily disabled in the UI; only French is exposed for now.
+export const SUPPORTED_LANGS: readonly Lang[] = ["fr"] as const;
 
 export const LANG_LABELS: Record<Lang, string> = {
   en: "English",
@@ -287,21 +288,8 @@ export type TKey = keyof Dictionary;
 const LANG_STORAGE_KEY = "cozycasa.lang";
 
 function detectInitialLang(): Lang {
-  if (typeof window === "undefined") return "en";
-  try {
-    const stored = window.localStorage?.getItem(LANG_STORAGE_KEY);
-    if (stored && (SUPPORTED_LANGS as readonly string[]).includes(stored)) {
-      return stored as Lang;
-    }
-  } catch {
-    // localStorage may be unavailable (e.g. SSR, privacy mode); fall through.
-  }
-  const nav =
-    typeof navigator !== "undefined" ? navigator.language : undefined;
-  if (typeof nav === "string" && nav.toLowerCase().startsWith("fr")) {
-    return "fr";
-  }
-  return "en";
+  // English is temporarily disabled in the UI; always start in French.
+  return "fr";
 }
 
 interface LanguageContextValue {
@@ -347,20 +335,20 @@ export function useLanguage(): LanguageContextValue {
   const ctx = useContext(LanguageContext);
   if (ctx) return ctx;
   // Fallback for components rendered without a provider (e.g. tests): act
-  // like a stateless English context. setLang becomes a no-op.
-  return { lang: "en", setLang: () => {}, t: EN };
+  // like a stateless French context. setLang becomes a no-op.
+  return { lang: "fr", setLang: () => {}, t: FR };
 }
 
 export function useT(): Dictionary {
   return useLanguage().t;
 }
 
-export function nightWord(n: number, lang: Lang = "en"): string {
+export function nightWord(n: number, lang: Lang = "fr"): string {
   if (lang === "fr") return n > 1 ? "nuits" : "nuit";
   return n > 1 ? "nights" : "night";
 }
 
-export function personWord(n: number, lang: Lang = "en"): string {
+export function personWord(n: number, lang: Lang = "fr"): string {
   if (lang === "fr") return n > 1 ? "personnes" : "personne";
   return n > 1 ? "people" : "person";
 }
@@ -372,7 +360,7 @@ export function localeFor(lang: Lang): string {
 // Maps server-returned error i18n keys to the localized message.
 export function translateServerError(
   error: unknown,
-  lang: Lang = "en",
+  lang: Lang = "fr",
 ): string {
   const dict = DICTIONARIES[lang];
   if (typeof error === "string" && error in dict) {

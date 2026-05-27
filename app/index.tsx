@@ -80,6 +80,8 @@ export default function Index() {
 function LanguageSwitcher() {
   const { lang, setLang } = useLanguage();
   const T = useT();
+  // Hide the switcher entirely when only one language is exposed.
+  if (SUPPORTED_LANGS.length < 2) return null;
   return (
     <View
       accessibilityRole="radiogroup"
