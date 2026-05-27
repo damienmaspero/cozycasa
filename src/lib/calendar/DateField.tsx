@@ -1,6 +1,7 @@
 import { createElement, useState } from "react";
 import { Platform, Pressable, Text } from "react-native";
 import { formatDate, parseLocalDate } from "./dates";
+import { useLanguage } from "./i18n";
 import { styles, colors } from "./styles";
 
 export interface DateFieldProps {
@@ -16,15 +17,19 @@ export default function DateField({
   minimumDate,
   invalid,
 }: DateFieldProps) {
+  const { lang } = useLanguage();
   if (Platform.OS === "web") {
     // react-native-web does not expose a typed <input type="date"> component,
     // so render the DOM node directly. Its value/onChange already use the
     // YYYY-MM-DD string form, matching the rest of the booking modal state.
+    // The `lang` attribute tells the browser which locale to use for the
+    // native calendar popup (month names, weekday headers, Clear/Today).
     const min = minimumDate ? formatDate(minimumDate) : undefined;
     return createElement("input", {
       type: "date",
       value,
       min,
+      lang,
       onChange: (e: { target: { value: string } }) =>
         onChange(e.target.value),
       style: {
