@@ -297,9 +297,7 @@ function detectInitialLang(): Lang {
     // localStorage may be unavailable (e.g. SSR, privacy mode); fall through.
   }
   const nav =
-    typeof navigator !== "undefined"
-      ? (navigator.language || (navigator as Navigator & { userLanguage?: string }).userLanguage)
-      : undefined;
+    typeof navigator !== "undefined" ? navigator.language : undefined;
   if (typeof nav === "string" && nav.toLowerCase().startsWith("fr")) {
     return "fr";
   }

@@ -23,7 +23,6 @@ import {
   SUPPORTED_LANGS,
   useLanguage,
   useT,
-  type Lang,
 } from "@/src/lib/calendar/i18n";
 
 type Org = { id: string; name: string; slug: string };
@@ -95,7 +94,7 @@ function LanguageSwitcher() {
             accessibilityRole="radio"
             accessibilityState={{ selected }}
             accessibilityLabel={LANG_LABELS[code]}
-            onPress={() => setLang(code as Lang)}
+            onPress={() => setLang(code)}
             style={({ pressed }) => [
               styles.langChip,
               selected && styles.langChipSelected,
