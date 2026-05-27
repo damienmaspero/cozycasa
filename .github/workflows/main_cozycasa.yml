@@ -20,6 +20,7 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read #This is required for actions/checkout
 
@@ -38,10 +39,36 @@ jobs:
           npm run build --if-present
           npm run test --if-present
 
+      # Cache Playwright's browser download (~161 MiB Chromium) keyed on the
+      # locked Playwright version so we only re-download when the dependency
+      # changes. Without this, every CI run pays ~4 min downloading Chromium
+      # from playwright.azureedge.net, and a slow/stalled CDN looks like a
+      # "stuck" workflow.
+      - name: Resolve Playwright version
+        id: playwright-version
+        run: |
+          version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
       - name: Install Playwright browsers
-        run: npm run test:e2e:install
+        timeout-minutes: 5
+        run: |
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" = "true" ]; then
+            # Browser binary is cached; still need the apt system libs.
+            npx playwright install-deps chromium
+          else
+            npm run test:e2e:install
+          fi
 
       - name: Run Playwright E2E tests
+        timeout-minutes: 10
         run: npm run test:e2e
 
       - name: Prune dev dependencies before deploy
