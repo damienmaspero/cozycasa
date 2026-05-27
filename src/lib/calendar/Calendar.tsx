@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Pressable, Text, View } from "react-native";
-import { T } from "./i18n";
+import { useT } from "./i18n";
 import { formatDate, getBookingNights } from "./dates";
 import { styles } from "./styles";
 import { HOUSE_CAPACITY, type Booking } from "./types";
@@ -42,6 +42,7 @@ export default function Calendar({
   onNext,
   onSelectDate,
 }: CalendarProps) {
+  const T = useT();
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
   const cells = useMemo(() => buildCells(year, month), [year, month]);

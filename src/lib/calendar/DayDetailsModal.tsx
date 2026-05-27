@@ -1,5 +1,5 @@
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { T, nightWord, personWord } from "./i18n";
+import { localeFor, nightWord, personWord, useLanguage } from "./i18n";
 import { formatDateLong, parseLocalDate } from "./dates";
 import { styles } from "./styles";
 import { HOUSE_CAPACITY, type Booking } from "./types";
@@ -23,6 +23,7 @@ export default function DayDetailsModal({
   onDelete,
   onConfirm,
 }: DayDetailsModalProps) {
+  const { lang, t: T } = useLanguage();
   const date = parseLocalDate(dateStr);
   const confirmed = dayBookings.filter((b) => !b.is_request);
   const requests = dayBookings.filter((b) => b.is_request);
@@ -36,7 +37,7 @@ export default function DayDetailsModal({
       keyboardShouldPersistTaps="handled"
     >
       <Text style={styles.h2}>
-        {T.bookings_for_night_of} {formatDateLong(date)}
+        {T.bookings_for_night_of} {formatDateLong(date, localeFor(lang))}
       </Text>
 
       <View style={styles.capacityInfo}>
@@ -72,7 +73,7 @@ export default function DayDetailsModal({
               <Text style={styles.bookingDetails}>
                 <Text style={styles.bookingName}>{booking.name}</Text>
                 {" — "}
-                {booking.guests} {personWord(booking.guests)}
+                {booking.guests} {personWord(booking.guests, lang)}
               </Text>
               {booking.is_request && (
                 <View style={styles.badge}>
@@ -80,8 +81,8 @@ export default function DayDetailsModal({
                 </View>
               )}
               <Text style={styles.bookingDate}>
-                {T.from} {formatDateLong(checkIn)} {T.to}{" "}
-                {formatDateLong(checkOut)} ({nights} {nightWord(nights)})
+                {T.from} {formatDateLong(checkIn, localeFor(lang))} {T.to}{" "}
+                {formatDateLong(checkOut, localeFor(lang))} ({nights} {nightWord(nights, lang)})
               </Text>
               {!!booking.comment && (
                 <Text style={styles.bookingComment}>{booking.comment}</Text>

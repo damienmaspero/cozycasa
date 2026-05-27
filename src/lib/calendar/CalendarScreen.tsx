@@ -12,7 +12,7 @@ import BookingsList from "./BookingsList";
 import DayDetailsModal from "./DayDetailsModal";
 import { useBookings } from "./useBookings";
 import { formatDate, parseLocalDate } from "./dates";
-import { T, translateServerError } from "./i18n";
+import { translateServerError, useLanguage } from "./i18n";
 import { styles } from "./styles";
 import { ask, notify } from "./dialogs";
 import type { Booking, BookingInput } from "./types";
@@ -32,6 +32,7 @@ export default function CalendarScreen({
   organizationId,
   organizationName,
 }: CalendarScreenProps) {
+  const { lang, t: T } = useLanguage();
   const { bookings, save, remove, confirm } = useBookings(organizationId);
 
   const [currentMonth, setCurrentMonth] = useState<Date>(() => {
@@ -95,7 +96,7 @@ export default function CalendarScreen({
       closeModal();
       notify(successMsg);
     } else {
-      notify(translateServerError(result.errorKey));
+      notify(translateServerError(result.errorKey, lang));
     }
   }
 
@@ -113,7 +114,7 @@ export default function CalendarScreen({
     notify(
       result.ok
         ? T.booking_confirmed_success
-        : translateServerError(result.errorKey),
+        : translateServerError(result.errorKey, lang),
     );
   }
 

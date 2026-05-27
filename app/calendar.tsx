@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import CalendarScreen from "@/src/lib/calendar/CalendarScreen";
 import { styles } from "@/src/lib/calendar/styles";
-import { T } from "@/src/lib/calendar/i18n";
+import { useT } from "@/src/lib/calendar/i18n";
 import { organization, useSession } from "@/src/lib/auth-client";
 
 type Org = { id: string; name: string; slug: string };
@@ -13,6 +13,7 @@ export default function CalendarRoute() {
   const params = useLocalSearchParams<{ org?: string }>();
   const { data: session, isPending } = useSession();
   const [orgs, setOrgs] = useState<Org[] | null>(null);
+  const T = useT();
 
   useEffect(() => {
     if (!session?.user) return;
@@ -38,7 +39,7 @@ export default function CalendarRoute() {
     return (
       <View style={[styles.container, styles.content]}>
         <Stack.Screen options={{ title: T.app_title }} />
-        <Text style={styles.h2}>Please sign in.</Text>
+        <Text style={styles.h2}>{T.please_sign_in}</Text>
         <Pressable
           onPress={() => router.replace("/")}
           style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
@@ -56,12 +57,12 @@ export default function CalendarRoute() {
     return (
       <View style={[styles.container, styles.content]}>
         <Stack.Screen options={{ title: T.app_title }} />
-        <Text style={styles.h2}>Choose a household</Text>
+        <Text style={styles.h2}>{T.choose_a_household}</Text>
         {orgs === null ? (
           <ActivityIndicator />
         ) : orgs.length === 0 ? (
           <Text style={styles.muted}>
-            You aren’t a member of any organization yet.
+            {T.not_member_of_any_org}
           </Text>
         ) : (
           <View style={{ gap: 8 }}>
@@ -98,7 +99,7 @@ export default function CalendarRoute() {
       <View style={[styles.container, styles.content]}>
         <Stack.Screen options={{ title: T.app_title }} />
         <Text style={styles.error}>
-          You are not a member of that organization.
+          {T.not_member_of_that_org}
         </Text>
         <Pressable
           onPress={() => router.replace("/calendar")}
