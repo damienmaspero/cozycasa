@@ -82,6 +82,13 @@ export default function BookingModal({
 
   const excludeId = isEdit && seed ? seed.id : null;
 
+  const checkOutMinimumDate = useMemo(() => {
+    if (!DATE_INPUT_PATTERN.test(checkIn)) return undefined;
+    const d = parseLocalDate(checkIn);
+    d.setDate(d.getDate() + 1);
+    return d;
+  }, [checkIn]);
+
   const datesValid =
     DATE_INPUT_PATTERN.test(checkIn) && DATE_INPUT_PATTERN.test(checkOut);
 
@@ -151,12 +158,7 @@ export default function BookingModal({
         <DateField
           value={checkOut}
           onChange={setCheckOut}
-          minimumDate={(() => {
-            if (!DATE_INPUT_PATTERN.test(checkIn)) return undefined;
-            const d = parseLocalDate(checkIn);
-            d.setDate(d.getDate() + 1);
-            return d;
-          })()}
+          minimumDate={checkOutMinimumDate}
           invalid={!DATE_INPUT_PATTERN.test(checkOut)}
         />
       </View>

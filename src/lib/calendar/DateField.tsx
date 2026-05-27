@@ -88,15 +88,13 @@ function NativeDateField({
         <DateTimePicker
           value={current}
           mode="date"
-          display={Platform.OS === "ios" ? "inline" : "default"}
+          display="default"
           minimumDate={minimumDate}
           onChange={(
             _event: unknown,
             selected: Date | undefined,
           ) => {
-            // Android dismisses automatically; iOS stays inline until user
-            // taps outside. Hide on every callback for consistent behavior.
-            if (Platform.OS !== "ios") setShow(false);
+            setShow(false);
             if (selected) onChange(formatDate(selected));
           }}
         />
