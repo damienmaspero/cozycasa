@@ -244,7 +244,7 @@ const FR: Dictionary = {
   check_in_date: "Date d’arrivée",
   check_out_date: "Date de départ",
   name_placeholder: "Votre nom",
-  number_of_guests: "Nombre d’invités",
+  number_of_guests: "Nombre de personnes",
   guests_placeholder: "ex. 4",
   comment_optional: "Commentaire (facultatif)",
   comment_placeholder: "Ajouter un commentaire...",
