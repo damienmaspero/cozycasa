@@ -1,4 +1,4 @@
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -9,7 +9,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Link } from "expo-router";
 import {
   apiBaseURL,
   authClient,
@@ -262,6 +261,7 @@ function SignedIn({ label, role }: { label: string; role?: string | null }) {
 }
 
 function Organizations({ isAdmin }: { isAdmin: boolean }) {
+  const router = useRouter();
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -309,19 +309,21 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
               <Text>
                 {o.name} <Text style={styles.code}>({o.slug})</Text>
               </Text>
-              <Link
-                href={{ pathname: "/calendar", params: { org: o.id } }}
-                asChild
+              <Pressable
+                accessibilityRole="link"
+                onPress={() => {
+                  router.push({
+                    pathname: "/calendar",
+                    params: { org: o.id },
+                  });
+                }}
+                style={({ pressed }) => [
+                  styles.button,
+                  pressed && styles.buttonPressed,
+                ]}
               >
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.button,
-                    pressed && styles.buttonPressed,
-                  ]}
-                >
-                  <Text style={styles.buttonText}>Open calendar</Text>
-                </Pressable>
-              </Link>
+                <Text style={styles.buttonText}>Open calendar</Text>
+              </Pressable>
               {isAdmin && (
                 <CreateOrganizationMember
                   organizationId={o.id}
