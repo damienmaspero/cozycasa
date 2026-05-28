@@ -18,9 +18,7 @@ export function resolveApiBaseURL({
   }
 
   const configuredURL = envApiURL?.trim();
-  return normalizeApiBaseURL(
-    configuredURL && configuredURL.length > 0
-      ? configuredURL
-      : DEFAULT_NATIVE_API_BASE_URL,
-  );
+  return configuredURL && configuredURL.length > 0
+    ? normalizeApiBaseURL(configuredURL)
+    : DEFAULT_NATIVE_API_BASE_URL;
 }
