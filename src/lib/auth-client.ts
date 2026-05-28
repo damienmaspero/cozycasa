@@ -51,7 +51,7 @@ const TOKEN_KEY = "cozycasa.auth.token";
 /**
  * Resolve the API base URL.
  * - On web we talk to the same origin that served the app.
- * - On native we use `EXPO_PUBLIC_API_URL` when set, otherwise the production
+ * - On native we use `EXPO_PUBLIC_API_URL` when set, otherwise the default
  *   HTTPS API so Android/iOS builds created without local env still work.
  */
 function resolveBaseURL(): string | undefined {
