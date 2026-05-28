@@ -38,7 +38,7 @@ describe("resolveApiBaseURL", () => {
     );
   });
 
-  test("falls back to the production API URL on native when unset", () => {
+  test("falls back to the test API URL on native when unset", () => {
     assert.equal(
       resolveApiBaseURL({
         envApiURL: undefined,

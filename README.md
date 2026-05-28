@@ -56,8 +56,8 @@ observability stacks are intentionally out of scope.
 
 Web builds call the same origin that served the app. Native iOS/Android builds
 call `EXPO_PUBLIC_API_URL` when it is set, and otherwise fall back to
-`https://www.thecozycasa.net` so a prebuilt Android app can reach the deployed
-API.
+`https://cozycasa-test-cyckd3afgvcchnd5.westeurope-01.azurewebsites.net` so a
+prebuilt Android app can reach the test API.
 
 For local Android API testing, set `EXPO_PUBLIC_API_URL` before starting or
 building Expo. Use `http://10.0.2.2:3000` for an Android emulator, or your
