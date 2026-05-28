@@ -215,7 +215,7 @@ const FR: Dictionary = {
     "Décembre",
   ],
   weekdays_short: ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"],
-  guests_short: "invités",
+  guests_short: "personnes",
   request_short: "demande",
   request_label: "demande",
   request_badge: "DEMANDE",
