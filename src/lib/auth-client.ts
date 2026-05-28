@@ -2,6 +2,7 @@ import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { createAuthClient } from "better-auth/react";
 import { adminClient, organizationClient, usernameClient } from "better-auth/client/plugins";
+import { resolveApiBaseURL } from "@/src/api-base-url";
 
 /**
  * Minimal async key/value storage interface used to persist the better-auth
@@ -50,14 +51,15 @@ const TOKEN_KEY = "cozycasa.auth.token";
 /**
  * Resolve the API base URL.
  * - On web we talk to the same origin that served the app.
- * - On native we read `EXPO_PUBLIC_API_URL` (set in `.env` / EAS) so the
- *   client works off-DOM.
+ * - On native we use `EXPO_PUBLIC_API_URL` when set, otherwise the production
+ *   HTTPS API so Android/iOS builds created without local env still work.
  */
 function resolveBaseURL(): string | undefined {
-  if (Platform.OS === "web") {
-    return typeof window !== "undefined" ? window.location.origin : undefined;
-  }
-  return process.env.EXPO_PUBLIC_API_URL;
+  return resolveApiBaseURL({
+    envApiURL: process.env.EXPO_PUBLIC_API_URL,
+    platformOS: Platform.OS,
+    webOrigin: typeof window !== "undefined" ? window.location.origin : undefined,
+  });
 }
 
 export const apiBaseURL = resolveBaseURL();
