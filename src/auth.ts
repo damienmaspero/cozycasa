@@ -4,6 +4,7 @@ import { admin, organization, username } from "better-auth/plugins";
 import { db } from "./db.ts";
 import { buildCorsHeaders } from "./auth-cors.ts";
 import { assertSignUpAllowedForUserCount } from "./auth-signup-gate.ts";
+import { DEFAULT_NATIVE_API_BASE_URL } from "./api-base-url.ts";
 
 // Origins trusted by better-auth in addition to `baseURL`. We add the native
 // deep-link scheme (matches `expo.scheme` in app.json) and the Expo / Metro web
@@ -14,6 +15,8 @@ export const TRUSTED_ORIGINS = [
   // Production web domains.
   "https://www.thecozycasa.net",
   "https://thecozycasa.net",
+  // Azure test API used by native fallback builds.
+  DEFAULT_NATIVE_API_BASE_URL,
   // Native deep-link scheme.
   "cozycasa://",
   // Expo Go / dev client deep links.

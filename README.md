@@ -52,6 +52,19 @@ observability stacks are intentionally out of scope.
 - `npm run typecheck` — type-check the server and Expo app
 - `npm test` — run the Node `node:test` suite for `src/server-utils.ts`, `src/auth-cors.ts`, `src/auth-signup-gate.ts`, and `src/bootstrap-status.ts`
 
+## Native API URL
+
+Web builds call the same origin that served the app. Native iOS/Android builds
+call `EXPO_PUBLIC_API_URL` when it is set, and otherwise fall back to
+`https://cozycasa-test-cyckd3afgvcchnd5.westeurope-01.azurewebsites.net` so a
+prebuilt Android app can reach the test API.
+
+For local Android API testing, set `EXPO_PUBLIC_API_URL` before starting or
+building Expo. Use `http://10.0.2.2:3000` for an Android emulator, or your
+computer's LAN IP for a physical device; `localhost` points at the device, not
+your computer. Restart Expo/rebuild after changing `EXPO_PUBLIC_` variables
+because Expo inlines them at build time.
+
 ## Operations
 
 - **Backups**: the SQLite database file (`node:sqlite`) lives on the server's
