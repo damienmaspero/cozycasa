@@ -4,9 +4,9 @@
 name: Build and deploy Node.js app to Azure Web App - cozycasa (test)
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types:
+      - opened
   workflow_dispatch:
 
 jobs:
