@@ -337,7 +337,7 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
   useEffect(() => {
     async function init() {
       const loaded = await reload();
-      if (loaded && loaded.length === 1 && loaded[0]) {
+      if (!isAdmin && loaded && loaded.length === 1 && loaded[0]) {
         router.replace({
           pathname: "/calendar",
           params: { org: loaded[0].id },
@@ -345,7 +345,7 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
       }
     }
     void init();
-  }, []);
+  }, [isAdmin, router]);
 
   async function onCreate() {
     setError(null);
