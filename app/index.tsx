@@ -328,13 +328,23 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  async function load() {
+  async function reload() {
     const res = await organization.list();
     if (res.data) setOrgs(res.data as Org[]);
+    return res.data ? (res.data as Org[]) : null;
   }
 
   useEffect(() => {
-    void load();
+    async function init() {
+      const loaded = await reload();
+      if (loaded && loaded.length === 1 && loaded[0]) {
+        router.replace({
+          pathname: "/calendar",
+          params: { org: loaded[0].id },
+        });
+      }
+    }
+    void init();
   }, []);
 
   async function onCreate() {
@@ -350,7 +360,7 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
       } else {
         setName("");
         setSlug("");
-        await load();
+        await reload();
       }
     } finally {
       setBusy(false);
