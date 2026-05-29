@@ -115,7 +115,7 @@ export const styles = {
     overflow: "hidden",
   },
   cell: {
-    width: "14.2857%",
+    width: "calc(100% / 7)",
     boxSizing: "border-box",
     minHeight: 88,
     borderRight: `1px solid ${colors.border}`,
