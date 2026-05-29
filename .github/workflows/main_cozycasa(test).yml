@@ -53,6 +53,13 @@ jobs:
         with:
           name: node-app
           path: .next/standalone
+          # The Next.js standalone production build lives in the hidden
+          # `.next/standalone/.next` directory. Since actions/upload-artifact
+          # v4.4.0 hidden files are excluded by default, which dropped the build
+          # from the artifact and made the deployed app crash at startup with
+          # "Could not find a production build in the './.next' directory".
+          # Keep hidden files so the `.next` build is deployed.
+          include-hidden-files: true
 
   deploy:
     runs-on: ubuntu-latest
