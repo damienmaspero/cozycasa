@@ -8,7 +8,4 @@ data
 .expo
 web-build
 expo-env.d.ts
-playwright-report/
 test-results/
-/blob-report/
-.playwright/
