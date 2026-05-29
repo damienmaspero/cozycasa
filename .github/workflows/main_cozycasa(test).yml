@@ -39,10 +39,14 @@ jobs:
           # that the standalone output omits, then point the deployed `start`
           # script at the standalone server (Azure runs `npm start`, and the
           # `startup-command` action input is rejected with publish-profile
-          # auth). Only the standalone copy is modified.
+          # auth). `HOSTNAME=0.0.0.0` is required: the standalone `server.js`
+          # binds to `process.env.HOSTNAME || '0.0.0.0'`, and Azure sets
+          # HOSTNAME to the container instance name, so without the override the
+          # server crashes with `getaddrinfo ENOTFOUND <instance>` and never
+          # answers the health probe. Only the standalone copy is modified.
           cp -r .next/static .next/standalone/.next/static
           if [ -d public ]; then cp -r public .next/standalone/public; fi
-          node -e "const fs=require('fs');const p='.next/standalone/package.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.scripts={...j.scripts,start:'node server.js'};fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');"
+          node -e "const fs=require('fs');const p='.next/standalone/package.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.scripts={...j.scripts,start:'HOSTNAME=0.0.0.0 node server.js'};fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4

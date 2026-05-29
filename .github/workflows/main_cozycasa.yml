@@ -57,7 +57,14 @@ jobs:
           # start command must live in the deployed package.json instead. Only
           # the standalone copy is changed; the repo's root package.json (used
           # by local `npm start` → `next start`) is left untouched.
-          node -e "const fs=require('fs');const p='.next/standalone/package.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.scripts={...j.scripts,start:'node server.js'};fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');"
+          #
+          # `HOSTNAME=0.0.0.0` is required: the standalone `server.js` binds to
+          # `process.env.HOSTNAME || '0.0.0.0'`, and Azure App Service sets
+          # HOSTNAME to the container instance name (e.g. `ln0xsdlwk0007J7`).
+          # Without the override the server tries to bind that name and crashes
+          # with `getaddrinfo ENOTFOUND <instance>`, so it never answers the
+          # port-8080 health probe and the container fails to start.
+          node -e "const fs=require('fs');const p='.next/standalone/package.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.scripts={...j.scripts,start:'HOSTNAME=0.0.0.0 node server.js'};fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');"
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
