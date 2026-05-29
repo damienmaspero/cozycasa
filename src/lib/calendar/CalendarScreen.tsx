@@ -25,13 +25,9 @@ type ModalState =
 
 export interface CalendarScreenProps {
   organizationId: string;
-  organizationName?: string;
 }
 
-export default function CalendarScreen({
-  organizationId,
-  organizationName,
-}: CalendarScreenProps) {
+export default function CalendarScreen({ organizationId }: CalendarScreenProps) {
   const { lang, t: T } = useLanguage();
   const { bookings, save, remove, confirm } = useBookings(organizationId);
 
@@ -123,9 +119,6 @@ export default function CalendarScreen({
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.h1}>{T.app_title}</Text>
-          {organizationName && (
-            <Text style={styles.muted}>{organizationName}</Text>
-          )}
         </View>
 
         <Calendar

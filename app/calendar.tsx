@@ -133,7 +133,6 @@ export default function CalendarRoute() {
       />
       <CalendarScreen
         organizationId={selectedOrgId}
-        organizationName={selectedOrg?.name}
       />
     </>
   );
