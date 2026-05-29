@@ -1,5 +1,5 @@
 import { Stack, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -328,11 +328,11 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  async function reload() {
+  const reload = useCallback(async () => {
     const res = await organization.list();
     if (res.data) setOrgs(res.data as Org[]);
     return res.data ? (res.data as Org[]) : null;
-  }
+  }, []);
 
   useEffect(() => {
     async function init() {
@@ -345,7 +345,7 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
       }
     }
     void init();
-  }, [isAdmin, router]);
+  }, [isAdmin, reload, router]);
 
   async function onCreate() {
     setError(null);
