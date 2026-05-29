@@ -246,10 +246,16 @@ function AuthForms() {
             style={styles.input}
             value={password}
             onChangeText={setPassword}
+            onSubmitEditing={() => {
+              if (canSubmit) {
+                void onSubmit();
+              }
+            }}
             secureTextEntry
             autoCapitalize="none"
             autoComplete={isSignUp ? "new-password" : "password"}
             textContentType={isSignUp ? "newPassword" : "password"}
+            returnKeyType={isSignUp ? "done" : "go"}
           />
         </View>
         <Pressable
