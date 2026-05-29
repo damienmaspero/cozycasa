@@ -25,7 +25,7 @@ observability stacks are intentionally out of scope.
 ## Stack
 
 - `expo` ~55, `react-native` 0.83, `react` 19.2, `react-dom` 19.2
-- `expo-router` v7 with the new Native Tabs API
+- `expo-router` for file-based routing with Stack screens
 - New Architecture (mandatory in SDK 55)
 - Min platforms: iOS 15.1+, Android 7 (API 24)+, Xcode 16.1+
 - `better-auth` 1.6.11 with `expo-secure-store` for native session storage
@@ -50,7 +50,7 @@ observability stacks are intentionally out of scope.
 - `npm start` — run the Node API server (serves the exported web build from
   `dist/`)
 - `npm run typecheck` — type-check the server and Expo app
-- `npm test` — run the Node `node:test` suite for `src/server-utils.ts`, `src/auth-cors.ts`, `src/auth-signup-gate.ts`, and `src/bootstrap-status.ts`
+- `npm test` — run the Node `node:test` suite for `src/server-utils.ts`, `src/auth-cors.ts`, `src/auth-signup-gate.ts`, `src/bootstrap-status.ts`, and `src/auth.ts`
 
 ## Operations
 
