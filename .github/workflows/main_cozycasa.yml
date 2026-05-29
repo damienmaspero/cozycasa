@@ -50,6 +50,14 @@ jobs:
           # them next to the server.
           cp -r .next/static .next/standalone/.next/static
           if [ -d public ]; then cp -r public .next/standalone/public; fi
+          # Point the deployed app's `start` script at the standalone server.
+          # Azure's Oryx startup runs `npm start`, and the `startup-command`
+          # action input is rejected with publish-profile auth ("startup-command
+          # is not a valid input ... with publish-profile auth scheme"), so the
+          # start command must live in the deployed package.json instead. Only
+          # the standalone copy is changed; the repo's root package.json (used
+          # by local `npm start` → `next start`) is left untouched.
+          node -e "const fs=require('fs');const p='.next/standalone/package.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.scripts={...j.scripts,start:'node server.js'};fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');"
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -61,5 +69,4 @@ jobs:
           # at the wwwroot root, so the SQLite `./data` path (relative to the
           # server's working directory) stays the same as before.
           package: .next/standalone
-          startup-command: 'node server.js'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2214993838554F44934AE77B7DF3FC5D }}

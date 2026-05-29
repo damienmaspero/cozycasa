@@ -59,14 +59,17 @@ observability stacks are intentionally out of scope.
   persistent disk and is backed up off-box on a regular schedule.
 - **Deploys**: the `main_cozycasa.yml` workflow builds with `next build`
   (`output: "standalone"`), assembles the self-contained `.next/standalone`
-  output (copying in `.next/static`), and deploys it to Azure App Service via
-  `azure/webapps-deploy@v3` (Kudu OneDeploy) with a startup command of
-  `node server.js`. Running the standalone server directly avoids the `next`
-  CLI / `node_modules/.bin` symlink, which Azure's repackaged `node_modules`
-  could not resolve (`next: not found`). Runs are serialized with a
-  `concurrency` group on the target slot so overlapping pushes cannot trigger
-  the `Conflict (CODE: 409)` Kudu returns when a previous deployment is still
-  in progress.
+  output (copying in `.next/static` and rewriting the deployed `package.json`
+  `start` script to `node server.js`), and deploys it to Azure App Service via
+  `azure/webapps-deploy@v3` (Kudu OneDeploy). Azure's Oryx startup runs
+  `npm start`, which now launches the standalone server directly and avoids the
+  `next` CLI / `node_modules/.bin` symlink that Azure's repackaged
+  `node_modules` could not resolve (`next: not found`). The start command lives
+  in the deployed `package.json` because the `startup-command` action input is
+  rejected with publish-profile auth. Runs are serialized with a `concurrency`
+  group on the target slot so overlapping pushes cannot trigger the
+  `Conflict (CODE: 409)` Kudu returns when a previous deployment is still in
+  progress.
 
 ## License
 

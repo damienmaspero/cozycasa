@@ -36,9 +36,13 @@ jobs:
           # See main_cozycasa.yml: deploy the self-contained `.next/standalone`
           # output (run with `node server.js`) instead of `next start`, which
           # Azure App Service cannot resolve. Copy in the static/public assets
-          # that the standalone output omits.
+          # that the standalone output omits, then point the deployed `start`
+          # script at the standalone server (Azure runs `npm start`, and the
+          # `startup-command` action input is rejected with publish-profile
+          # auth). Only the standalone copy is modified.
           cp -r .next/static .next/standalone/.next/static
           if [ -d public ]; then cp -r public .next/standalone/public; fi
+          node -e "const fs=require('fs');const p='.next/standalone/package.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.scripts={...j.scripts,start:'node server.js'};fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -63,5 +67,4 @@ jobs:
           app-name: 'cozycasa'
           slot-name: 'test'
           package: .
-          startup-command: 'node server.js'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A0CD9D90AA0841A88B05DB87B7DB5F79 }}
