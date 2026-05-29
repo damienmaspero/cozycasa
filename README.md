@@ -57,9 +57,13 @@ observability stacks are intentionally out of scope.
 
 - **Backups**: the SQLite database file (`node:sqlite`) lives on the server's
   persistent disk and is backed up off-box on a regular schedule.
-- **Deploys**: the `main_cozycasa.yml` workflow builds with `next build` and
-  deploys to Azure App Service via `azure/webapps-deploy@v3` (Kudu OneDeploy),
-  which runs the app with `next start`. Runs are serialized with a
+- **Deploys**: the `main_cozycasa.yml` workflow builds with `next build`
+  (`output: "standalone"`), assembles the self-contained `.next/standalone`
+  output (copying in `.next/static`), and deploys it to Azure App Service via
+  `azure/webapps-deploy@v3` (Kudu OneDeploy) with a startup command of
+  `node server.js`. Running the standalone server directly avoids the `next`
+  CLI / `node_modules/.bin` symlink, which Azure's repackaged `node_modules`
+  could not resolve (`next: not found`). Runs are serialized with a
   `concurrency` group on the target slot so overlapping pushes cannot trigger
   the `Conflict (CODE: 409)` Kudu returns when a previous deployment is still
   in progress.
