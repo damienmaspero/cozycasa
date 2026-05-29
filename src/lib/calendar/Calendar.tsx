@@ -1,5 +1,6 @@
+"use client";
+
 import { useMemo } from "react";
-import { Pressable, Text, View } from "react-native";
 import { useT } from "./i18n";
 import { formatDate, getBookingNights } from "./dates";
 import { styles } from "./styles";
@@ -64,47 +65,41 @@ export default function Calendar({
   const todayStr = today.toDateString();
 
   return (
-    <View>
-      <Text style={styles.h2}>{T.booking_calendar}</Text>
-      <View style={styles.calendarControls}>
-        <Pressable
-          onPress={onPrev}
-          style={({ pressed }) => [
-            styles.btn,
-            styles.btnNav,
-            pressed && styles.btnPressed,
-          ]}
+    <div>
+      <h2 style={styles.h2}>{T.booking_calendar}</h2>
+      <div style={styles.calendarControls}>
+        <button
+          type="button"
+          onClick={onPrev}
+          style={{ ...styles.btn, ...styles.btnNav }}
         >
-          <Text style={styles.btnNavText}>{T.previous}</Text>
-        </Pressable>
-        <Text style={styles.currentMonth}>{`${T.months[month]} ${year}`}</Text>
-        <Pressable
-          onPress={onNext}
-          style={({ pressed }) => [
-            styles.btn,
-            styles.btnNav,
-            pressed && styles.btnPressed,
-          ]}
+          <span style={styles.btnNavText}>{T.previous}</span>
+        </button>
+        <span style={styles.currentMonth}>{`${T.months[month]} ${year}`}</span>
+        <button
+          type="button"
+          onClick={onNext}
+          style={{ ...styles.btn, ...styles.btnNav }}
         >
-          <Text style={styles.btnNavText}>{T.next}</Text>
-        </Pressable>
-      </View>
+          <span style={styles.btnNavText}>{T.next}</span>
+        </button>
+      </div>
 
-      <View style={styles.weekRow}>
+      <div style={styles.weekRow}>
         {T.weekdays_short.map((w) => (
-          <View key={w} style={styles.weekCell}>
-            <Text style={styles.weekCellText}>{w}</Text>
-          </View>
+          <div key={w} style={styles.weekCell}>
+            <span style={styles.weekCellText}>{w}</span>
+          </div>
         ))}
-      </View>
+      </div>
 
-      <View style={styles.grid}>
+      <div style={styles.grid}>
         {cells.map((cell, idx) => {
           if (cell.kind === "empty") {
             return (
-              <View
+              <div
                 key={`e-${idx}`}
-                style={[styles.cell, styles.cellEmpty]}
+                style={{ ...styles.cell, ...styles.cellEmpty, cursor: "default" }}
               />
             );
           }
@@ -122,63 +117,67 @@ export default function Calendar({
           const isBooked = allDay.length > 0;
 
           return (
-            <Pressable
+            <button
+              type="button"
               key={dateStr}
-              onPress={() => onSelectDate(dateStr)}
-              style={({ pressed }) => [
-                styles.cell,
-                isPast && styles.cellPast,
-                isBooked && styles.cellBooked,
-                isFull && styles.cellFull,
-                isToday && styles.cellToday,
-                pressed && styles.btnPressed,
-              ]}
+              onClick={() => onSelectDate(dateStr)}
+              style={{
+                ...styles.cell,
+                ...(isPast ? styles.cellPast : null),
+                ...(isBooked ? styles.cellBooked : null),
+                ...(isFull ? styles.cellFull : null),
+                ...(isToday ? styles.cellToday : null),
+              }}
             >
-              <Text
-                style={[styles.dayNumber, isPast && styles.dayNumberPast]}
+              <span
+                style={{
+                  ...styles.dayNumber,
+                  ...(isPast ? styles.dayNumberPast : null),
+                  display: "block",
+                }}
               >
                 {cell.day}
-              </Text>
+              </span>
               {allDay.length > 0 && (
-                <View>
+                <div>
                   {allDay.slice(0, 2).map((b) => (
-                    <View
+                    <div
                       key={b.id}
-                      style={[
-                        styles.bookingMini,
-                        b.is_request && styles.bookingMiniRequest,
-                      ]}
+                      style={{
+                        ...styles.bookingMini,
+                        ...(b.is_request ? styles.bookingMiniRequest : null),
+                      }}
                     >
-                      <Text
-                        numberOfLines={1}
-                        style={
-                          b.is_request
+                      <span
+                        style={{
+                          ...(b.is_request
                             ? styles.bookingMiniRequestText
-                            : styles.bookingMiniText
-                        }
+                            : styles.bookingMiniText),
+                          display: "block",
+                        }}
                       >
                         {b.name} ({b.guests})
                         {b.is_request ? ` ${T.request_label}` : ""}
-                      </Text>
-                    </View>
+                      </span>
+                    </div>
                   ))}
                   {allDay.length > 2 && (
-                    <Text style={styles.bookingMore}>
+                    <div style={styles.bookingMore}>
                       +{allDay.length - 2} {T.others}
-                    </Text>
+                    </div>
                   )}
-                  <Text style={styles.capacityLine}>
+                  <div style={styles.capacityLine}>
                     {totalGuests}/{HOUSE_CAPACITY} {T.guests_short}
                     {requestGuests > 0
                       ? ` (+${requestGuests} ${T.request_short})`
                       : ""}
-                  </Text>
-                </View>
+                  </div>
+                </div>
               )}
-            </Pressable>
+            </button>
           );
         })}
-      </View>
-    </View>
+      </div>
+    </div>
   );
 }

@@ -1,4 +1,5 @@
-import { Pressable, Text, View } from "react-native";
+"use client";
+
 import { localeFor, nightWord, personWord, useLanguage } from "./i18n";
 import { formatDateLong, parseLocalDate } from "./dates";
 import { styles } from "./styles";
@@ -30,12 +31,12 @@ export default function BookingsList({
     .slice(0, 10);
 
   return (
-    <View>
-      <Text style={styles.h2}>{T.upcoming_bookings}</Text>
+    <div>
+      <h2 style={styles.h2}>{T.upcoming_bookings}</h2>
       {upcoming.length === 0 ? (
-        <Text style={styles.muted}>{T.no_upcoming_bookings}</Text>
+        <p style={styles.muted}>{T.no_upcoming_bookings}</p>
       ) : (
-        <View style={{ gap: 8 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {upcoming.map((booking) => {
             const checkIn = parseLocalDate(booking.check_in_date);
             const checkOut = parseLocalDate(booking.check_out_date);
@@ -44,70 +45,63 @@ export default function BookingsList({
                 (1000 * 60 * 60 * 24),
             );
             return (
-              <View
+              <div
                 key={booking.id}
-                style={[
-                  styles.bookingItem,
-                  booking.is_request && styles.bookingItemRequest,
-                ]}
+                style={{
+                  ...styles.bookingItem,
+                  ...(booking.is_request ? styles.bookingItemRequest : null),
+                }}
               >
-                <Text style={styles.bookingDate}>
-                  {formatDateLong(checkIn, localeFor(lang))} → {formatDateLong(checkOut, localeFor(lang))}
-                </Text>
-                <Text style={styles.bookingDate}>
+                <span style={styles.bookingDate}>
+                  {formatDateLong(checkIn, localeFor(lang))} →{" "}
+                  {formatDateLong(checkOut, localeFor(lang))}
+                </span>
+                <span style={styles.bookingDate}>
                   ({nights} {nightWord(nights, lang)})
-                </Text>
+                </span>
                 {booking.is_request && (
-                  <View style={styles.badge}>
-                    <Text style={styles.badgeText}>{T.request_badge}</Text>
-                  </View>
+                  <span style={styles.badge}>
+                    <span style={styles.badgeText}>{T.request_badge}</span>
+                  </span>
                 )}
-                <Text style={styles.bookingDetails}>
-                  <Text style={styles.bookingName}>{booking.name}</Text>
+                <span style={styles.bookingDetails}>
+                  <span style={styles.bookingName}>{booking.name}</span>
                   {" — "}
                   {booking.guests} {personWord(booking.guests, lang)}
-                </Text>
+                </span>
                 {!!booking.comment && (
-                  <Text style={styles.bookingComment}>{booking.comment}</Text>
+                  <span style={styles.bookingComment}>{booking.comment}</span>
                 )}
-                <View style={styles.actionsRow}>
+                <div style={styles.actionsRow}>
                   {booking.is_request && (
-                    <Pressable
-                      onPress={() => onConfirm(booking.id)}
-                      style={({ pressed }) => [
-                        styles.btn,
-                        styles.btnConfirm,
-                        pressed && styles.btnPressed,
-                      ]}
+                    <button
+                      type="button"
+                      onClick={() => onConfirm(booking.id)}
+                      style={{ ...styles.btn, ...styles.btnConfirm }}
                     >
-                      <Text style={styles.btnText}>{T.confirm}</Text>
-                    </Pressable>
+                      <span style={styles.btnText}>{T.confirm}</span>
+                    </button>
                   )}
-                  <Pressable
-                    onPress={() => onEdit(booking.id)}
-                    style={({ pressed }) => [
-                      styles.btn,
-                      pressed && styles.btnPressed,
-                    ]}
+                  <button
+                    type="button"
+                    onClick={() => onEdit(booking.id)}
+                    style={styles.btn}
                   >
-                    <Text style={styles.btnText}>{T.edit}</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => onDelete(booking.id)}
-                    style={({ pressed }) => [
-                      styles.btn,
-                      styles.btnDanger,
-                      pressed && styles.btnPressed,
-                    ]}
+                    <span style={styles.btnText}>{T.edit}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDelete(booking.id)}
+                    style={{ ...styles.btn, ...styles.btnDanger }}
                   >
-                    <Text style={styles.btnText}>{T.delete}</Text>
-                  </Pressable>
-                </View>
-              </View>
+                    <span style={styles.btnText}>{T.delete}</span>
+                  </button>
+                </div>
+              </div>
             );
           })}
-        </View>
+        </div>
       )}
-    </View>
+    </div>
   );
 }

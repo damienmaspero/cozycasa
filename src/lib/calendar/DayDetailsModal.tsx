@@ -1,4 +1,5 @@
-import { Pressable, ScrollView, Text, View } from "react-native";
+"use client";
+
 import { localeFor, nightWord, personWord, useLanguage } from "./i18n";
 import { formatDateLong, parseLocalDate } from "./dates";
 import { styles } from "./styles";
@@ -32,122 +33,106 @@ export default function DayDetailsModal({
   const remaining = HOUSE_CAPACITY - totalGuests;
 
   return (
-    <ScrollView
-      contentContainerStyle={{ gap: 12 }}
-      keyboardShouldPersistTaps="handled"
-    >
-      <Text style={styles.h2}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <h2 style={styles.h2}>
         {T.bookings_for_night_of} {formatDateLong(date, localeFor(lang))}
-      </Text>
+      </h2>
 
-      <View style={styles.capacityInfo}>
-        <Text>
-          <Text style={styles.bold}>{T.capacity}:</Text> {totalGuests}/
+      <div style={styles.capacityInfo}>
+        <span>
+          <span style={styles.bold}>{T.capacity}:</span> {totalGuests}/
           {HOUSE_CAPACITY} {T.people} ({remaining} {T.spots_remaining})
-        </Text>
+        </span>
         {requestGuests > 0 && (
-          <Text>
-            <Text style={styles.bold}>{T.requests}:</Text> {requestGuests}{" "}
+          <span>
+            <span style={styles.bold}>{T.requests}:</span> {requestGuests}{" "}
             {T.persons_requesting}
-          </Text>
+          </span>
         )}
-      </View>
+      </div>
 
-      <Text style={styles.h3}>{T.bookings}</Text>
-      <View style={{ gap: 8 }}>
+      <h3 style={styles.h3}>{T.bookings}</h3>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {dayBookings.map((booking) => {
           const checkIn = parseLocalDate(booking.check_in_date);
           const checkOut = parseLocalDate(booking.check_out_date);
           const nights = Math.floor(
-            (checkOut.getTime() - checkIn.getTime()) /
-              (1000 * 60 * 60 * 24),
+            (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24),
           );
           return (
-            <View
+            <div
               key={booking.id}
-              style={[
-                styles.bookingItem,
-                booking.is_request && styles.bookingItemRequest,
-              ]}
+              style={{
+                ...styles.bookingItem,
+                ...(booking.is_request ? styles.bookingItemRequest : null),
+              }}
             >
-              <Text style={styles.bookingDetails}>
-                <Text style={styles.bookingName}>{booking.name}</Text>
+              <span style={styles.bookingDetails}>
+                <span style={styles.bookingName}>{booking.name}</span>
                 {" — "}
                 {booking.guests} {personWord(booking.guests, lang)}
-              </Text>
+              </span>
               {booking.is_request && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{T.request_badge}</Text>
-                </View>
+                <span style={styles.badge}>
+                  <span style={styles.badgeText}>{T.request_badge}</span>
+                </span>
               )}
-              <Text style={styles.bookingDate}>
+              <span style={styles.bookingDate}>
                 {T.from} {formatDateLong(checkIn, localeFor(lang))} {T.to}{" "}
-                {formatDateLong(checkOut, localeFor(lang))} ({nights} {nightWord(nights, lang)})
-              </Text>
+                {formatDateLong(checkOut, localeFor(lang))} ({nights}{" "}
+                {nightWord(nights, lang)})
+              </span>
               {!!booking.comment && (
-                <Text style={styles.bookingComment}>{booking.comment}</Text>
+                <span style={styles.bookingComment}>{booking.comment}</span>
               )}
-              <View style={styles.actionsRow}>
+              <div style={styles.actionsRow}>
                 {booking.is_request && (
-                  <Pressable
-                    onPress={() => onConfirm(booking.id)}
-                    style={({ pressed }) => [
-                      styles.btn,
-                      styles.btnConfirm,
-                      pressed && styles.btnPressed,
-                    ]}
+                  <button
+                    type="button"
+                    onClick={() => onConfirm(booking.id)}
+                    style={{ ...styles.btn, ...styles.btnConfirm }}
                   >
-                    <Text style={styles.btnText}>{T.confirm}</Text>
-                  </Pressable>
+                    <span style={styles.btnText}>{T.confirm}</span>
+                  </button>
                 )}
-                <Pressable
-                  onPress={() => onEdit(booking.id)}
-                  style={({ pressed }) => [
-                    styles.btn,
-                    pressed && styles.btnPressed,
-                  ]}
+                <button
+                  type="button"
+                  onClick={() => onEdit(booking.id)}
+                  style={styles.btn}
                 >
-                  <Text style={styles.btnText}>{T.edit}</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => onDelete(booking.id)}
-                  style={({ pressed }) => [
-                    styles.btn,
-                    styles.btnDanger,
-                    pressed && styles.btnPressed,
-                  ]}
+                  <span style={styles.btnText}>{T.edit}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onDelete(booking.id)}
+                  style={{ ...styles.btn, ...styles.btnDanger }}
                 >
-                  <Text style={styles.btnText}>{T.delete}</Text>
-                </Pressable>
-              </View>
-            </View>
+                  <span style={styles.btnText}>{T.delete}</span>
+                </button>
+              </div>
+            </div>
           );
         })}
-      </View>
+      </div>
 
-      <View style={styles.modalActions}>
-        <Pressable
-          onPress={onClose}
-          style={({ pressed }) => [
-            styles.btn,
-            styles.btnSecondary,
-            pressed && styles.btnPressed,
-          ]}
+      <div style={styles.modalActions}>
+        <button
+          type="button"
+          onClick={onClose}
+          style={{ ...styles.btn, ...styles.btnSecondary }}
         >
-          <Text style={styles.btnText}>{T.cancel}</Text>
-        </Pressable>
+          <span style={styles.btnText}>{T.cancel}</span>
+        </button>
         {remaining > 0 && (
-          <Pressable
-            onPress={() => onAdd(dateStr)}
-            style={({ pressed }) => [
-              styles.btn,
-              pressed && styles.btnPressed,
-            ]}
+          <button
+            type="button"
+            onClick={() => onAdd(dateStr)}
+            style={styles.btn}
           >
-            <Text style={styles.btnText}>{T.add_booking}</Text>
-          </Pressable>
+            <span style={styles.btnText}>{T.add_booking}</span>
+          </button>
         )}
-      </View>
-    </ScrollView>
+      </div>
+    </div>
   );
 }

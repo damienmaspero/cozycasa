@@ -4,39 +4,26 @@
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
-  "main": "expo-router/entry",
   "engines": {
     "node": ">=24.0.0"
   },
   "scripts": {
-    "dev:api": "node --env-file-if-exists=.env --watch src/server.ts",
-    "dev:expo": "expo start",
-    "build": "expo export --platform web --output-dir dist",
-    "start": "node --env-file-if-exists=.env src/server.ts",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc --noEmit",
     "test": "node --test src/server-utils.test.ts src/auth-cors.test.ts src/auth-signup-gate.test.ts src/bootstrap-status.test.ts src/auth.test.ts"
   },
   "dependencies": {
-    "@react-native-community/datetimepicker": "8.6.0",
     "better-auth": "1.6.11",
-    "expo": "~55.0.25",
-    "expo-router": "~55.0.15",
-    "expo-secure-store": "~15.0.8",
-    "expo-status-bar": "~55.0.6",
     "next": "^16.2.6",
     "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "react-native": "0.83.6",
-    "react-native-safe-area-context": "~5.6.2",
-    "react-native-screens": "~4.23.0",
-    "react-native-web": "~0.21.0"
+    "react-dom": "19.2.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.0",
     "@types/node": "25.8.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "babel-preset-expo": "~55.0.22",
     "typescript": "6.0.3"
   }
 }

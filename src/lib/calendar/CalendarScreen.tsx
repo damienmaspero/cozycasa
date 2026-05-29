@@ -1,11 +1,6 @@
+"use client";
+
 import { useCallback, useState } from "react";
-import {
-  Modal,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
 import BookingModal from "./BookingModal";
 import Calendar from "./Calendar";
 import BookingsList from "./BookingsList";
@@ -115,11 +110,11 @@ export default function CalendarScreen({ organizationId }: CalendarScreenProps) 
   }
 
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.h1}>{T.app_title}</Text>
-        </View>
+    <div style={styles.container}>
+      <div style={styles.content}>
+        <div style={styles.header}>
+          <h1 style={styles.h1}>{T.app_title}</h1>
+        </div>
 
         <Calendar
           currentMonth={currentMonth}
@@ -144,27 +139,28 @@ export default function CalendarScreen({ organizationId }: CalendarScreenProps) 
           onConfirm={handleConfirm}
         />
 
-        <View style={{ height: 80 }} />
-      </ScrollView>
+        <div style={{ height: 80 }} />
+      </div>
 
-      <Pressable
-        style={({ pressed }) => [styles.fab, pressed && styles.btnPressed]}
-        onPress={openNewBooking}
-        accessibilityLabel={T.add_booking}
+      <button
+        type="button"
+        style={styles.fab}
+        onClick={openNewBooking}
+        aria-label={T.add_booking}
       >
-        <Text style={styles.fabPlus}>+</Text>
-        <Text style={styles.fabText}>{T.book_cta}</Text>
-      </Pressable>
+        <span style={styles.fabPlus}>+</span>
+        <span style={styles.fabText}>{T.book_cta}</span>
+      </button>
 
-      <Modal
-        visible={!!modal}
-        transparent
-        animationType="fade"
-        onRequestClose={closeModal}
-      >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalContent}>
-            {modal?.type === "day" && (
+      {modal && (
+        <div
+          style={styles.modalBackdrop}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) closeModal();
+          }}
+        >
+          <div style={styles.modalContent} role="dialog" aria-modal="true">
+            {modal.type === "day" && (
               <DayDetailsModal
                 dateStr={modal.dateStr}
                 dayBookings={modal.bookings}
@@ -175,7 +171,7 @@ export default function CalendarScreen({ organizationId }: CalendarScreenProps) 
                 onConfirm={handleConfirm}
               />
             )}
-            {(modal?.type === "new" || modal?.type === "edit") && (
+            {(modal.type === "new" || modal.type === "edit") && (
               <BookingModal
                 initial={modal}
                 bookings={bookings}
@@ -183,9 +179,9 @@ export default function CalendarScreen({ organizationId }: CalendarScreenProps) 
                 onClose={closeModal}
               />
             )}
-          </View>
-        </View>
-      </Modal>
-    </View>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

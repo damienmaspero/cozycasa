@@ -1,8 +1,8 @@
-An [Expo SDK 55][sdk-55] (Expo Router) app talking to a Node /
-[`better-auth`][better-auth] API server. Targets web, iOS, and Android from a
-single React Native codebase.
+A [Next.js][nextjs] (App Router, React Server Components) web app with a
+[`better-auth`][better-auth] backend folded into the same deployable. Targets
+the web only.
 
-[sdk-55]: https://expo.dev/changelog/sdk-55
+[nextjs]: https://nextjs.org
 [better-auth]: https://better-auth.com
 
 ## Scope
@@ -24,40 +24,42 @@ observability stacks are intentionally out of scope.
 
 ## Stack
 
-- `expo` ~55, `react-native` 0.83, `react` 19.2, `react-dom` 19.2
-- `expo-router` for file-based routing with Stack screens
-- New Architecture (mandatory in SDK 55)
-- Min platforms: iOS 15.1+, Android 7 (API 24)+, Xcode 16.1+
-- `better-auth` 1.6.11 with `expo-secure-store` for native session storage
+- `next` 16 (App Router + React Server Components), `react` 19.2, `react-dom` 19.2
+- File-based routing under `app/`; interactive UI uses `"use client"` components
+- `better-auth` 1.6.11 with cookie-based web sessions
 - Node.js 24 with the native SQL API (`node:sqlite`) for the database layer
-- Node API server in `src/server.ts`
+- API implemented as Next.js Route Handlers (Node.js runtime), no separate server
 
 ## Project layout
 
-- `app/` — Expo Router routes (entry is `expo-router/entry`)
-- `src/lib/` — shared client code (e.g. `auth-client.ts` with
-  platform-conditional storage)
-- `src/server.ts`, `src/auth.ts`, `src/db.ts` — Node API server and
-  `better-auth` configuration
-- `app.json`, `babel.config.cjs`, `metro.config.cjs` — Expo / Metro config
-- `tsconfig.json` — Expo app TS config; `tsconfig.server.json` — server TS config
+- `app/` — Next.js App Router routes and API Route Handlers
+  - `app/layout.tsx`, `app/page.tsx`, `app/calendar/page.tsx` — pages
+  - `app/api/auth/[...all]/route.ts` — better-auth catch-all handler
+  - `app/api/bookings/`, `app/api/bootstrap-status/`,
+    `app/api/auth/organization/create-member/` — REST endpoints
+- `src/lib/` — shared client code (`auth-client.ts`, calendar UI in
+  `src/lib/calendar/`)
+- `src/auth.ts`, `src/db.ts`, `src/bookings-*.ts`, `src/organization-members.ts`,
+  `src/bootstrap-status.ts` — server-side logic imported by Route Handlers
+- `instrumentation.ts` — runs better-auth and bookings migrations at startup
+- `next.config.mjs` — Next.js config (apex→www canonical redirect)
+- `tsconfig.json` — Next.js app TS config; `tsconfig.server.json` — server TS config
 
 ## Scripts
 
-- `npm run dev:api` — run the Node API server with `--watch`
-- `npm run dev:expo` — start the Expo dev server (web / iOS / Android)
-- `npm run build` — `expo export --platform web --output-dir dist`
-- `npm start` — run the Node API server (serves the exported web build from
-  `dist/`)
-- `npm run typecheck` — type-check the server and Expo app
+- `npm run dev` — start the Next.js dev server
+- `npm run build` — `next build`
+- `npm start` — `next start` (production server; respects `PORT`)
+- `npm run typecheck` — type-check the server and the Next.js app
 - `npm test` — run the Node `node:test` suite for `src/server-utils.ts`, `src/auth-cors.ts`, `src/auth-signup-gate.ts`, `src/bootstrap-status.ts`, and `src/auth.ts`
 
 ## Operations
 
 - **Backups**: the SQLite database file (`node:sqlite`) lives on the server's
   persistent disk and is backed up off-box on a regular schedule.
-- **Deploys**: the `main_cozycasa.yml` workflow deploys to Azure App Service
-  via `azure/webapps-deploy@v3` (Kudu OneDeploy). Runs are serialized with a
+- **Deploys**: the `main_cozycasa.yml` workflow builds with `next build` and
+  deploys to Azure App Service via `azure/webapps-deploy@v3` (Kudu OneDeploy),
+  which runs the app with `next start`. Runs are serialized with a
   `concurrency` group on the target slot so overlapping pushes cannot trigger
   the `Conflict (CODE: 409)` Kudu returns when a previous deployment is still
   in progress.

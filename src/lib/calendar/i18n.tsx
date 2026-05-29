@@ -1,3 +1,5 @@
+"use client";
+
 // Bilingual (English / French) string table for the UI. A small React
 // context exposes the active language and lets components read translated
 // strings via the `useT()` hook. The selection is persisted in

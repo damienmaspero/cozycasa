@@ -1,30 +1,47 @@
 {
-  "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "allowJs": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "noEmit": true,
     "isolatedModules": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     }
   },
   "include": [
+    "next-env.d.ts",
     "app/**/*.ts",
     "app/**/*.tsx",
-    "src/lib/**/*.ts",
-    "src/lib/**/*.tsx",
-    "expo-env.d.ts",
-    ".expo/types/**/*.ts"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "instrumentation.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
-    "dist",
-    "src/server.ts",
-    "src/auth.ts",
-    "src/db.ts",
-    "src/bootstrap-status.ts"
+    ".next"
   ]
 }

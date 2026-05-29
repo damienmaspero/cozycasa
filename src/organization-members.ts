@@ -1,20 +1,5 @@
-import { createServer, type IncomingHttpHeaders, type IncomingMessage } from "node:http";
-import { resolve } from "node:path";
-import { getMigrations } from "better-auth/db/migration";
-import { auth, authOptions, isElevatedRole } from "./auth.ts";
-import { readBootstrapStatus } from "./bootstrap-status.ts";
-import { db } from "./db.ts";
-import { runBookingsMigrations } from "./bookings-db.ts";
-import { handleBookings } from "./bookings-handler.ts";
-import {
-  getCanonicalHostRedirect,
-  sendWebResponse,
-  serveStatic,
-  toWebRequest,
-} from "./server-utils.ts";
+import { auth, isElevatedRole } from "./auth.ts";
 
-const PORT = Number(process.env.PORT ?? 3000);
-const DIST_DIR = resolve(process.cwd(), "dist");
 const SYNTHETIC_EMAIL_DOMAIN = "cozycasa.invalid";
 const ORGANIZATION_MEMBER_ROLES = new Set(["member", "admin", "owner"]);
 const JSON_BODY_LIMIT_BYTES = 16 * 1024;
@@ -69,35 +54,15 @@ function jsonResponse(status: number, body: unknown): Response {
   });
 }
 
-function toWebHeaders(headers: IncomingHttpHeaders): Headers {
-  const result = new Headers();
-  for (const [name, value] of Object.entries(headers)) {
-    if (Array.isArray(value)) {
-      for (const item of value) {
-        result.append(name, item);
-      }
-    } else if (value !== undefined) {
-      result.set(name, value);
-    }
-  }
-  return result;
-}
-
-async function readJSONBody(req: IncomingMessage): Promise<unknown> {
-  const chunks: Buffer[] = [];
-  let size = 0;
-  for await (const chunk of req) {
-    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-    size += buffer.length;
-    if (size > JSON_BODY_LIMIT_BYTES) {
-      throw new Error(`Request body exceeds limit of ${JSON_BODY_LIMIT_BYTES} bytes`);
-    }
-    chunks.push(buffer);
-  }
-  if (chunks.length === 0) {
+async function readJSONBody(req: Request): Promise<unknown> {
+  const text = await req.text();
+  if (text.length === 0) {
     throw new Error("Request body cannot be empty");
   }
-  return JSON.parse(Buffer.concat(chunks).toString("utf8")) as unknown;
+  if (Buffer.byteLength(text, "utf8") > JSON_BODY_LIMIT_BYTES) {
+    throw new Error(`Request body exceeds limit of ${JSON_BODY_LIMIT_BYTES} bytes`);
+  }
+  return JSON.parse(text) as unknown;
 }
 
 function parseCreateOrganizationMemberBody(
@@ -106,13 +71,10 @@ function parseCreateOrganizationMemberBody(
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error("Request body must be a JSON object");
   }
-  const {
-    organizationId,
-    username,
-    password,
-    role,
-    name,
-  } = value as Record<string, unknown>;
+  const { organizationId, username, password, role, name } = value as Record<
+    string,
+    unknown
+  >;
   const parsed = {
     organizationId:
       typeof organizationId === "string" ? organizationId.trim() : "",
@@ -190,17 +152,16 @@ async function rollbackCreatedUser(
   }
 }
 
-async function handleCreateOrganizationMember(
-  req: IncomingMessage,
+export async function handleCreateOrganizationMember(
+  req: Request,
 ): Promise<Response> {
-  const headers = toWebHeaders(req.headers);
+  const headers = req.headers;
 
   // Authorization: only callers with an elevated role (i.e. not `"user"`) may
   // create accounts. Role `"user"` is the admin plugin's default for every
-  // new sign-up (see `node_modules/better-auth/dist/plugins/admin/admin.mjs`),
-  // so without this check a regular member could create new users by hitting
-  // this endpoint directly. The bootstrap user is promoted to `"admin"` in
-  // `src/auth.ts` so they can still seed accounts.
+  // new sign-up, so without this check a regular member could create new
+  // users by hitting this endpoint directly. The bootstrap user is promoted
+  // to `"admin"` in `src/auth.ts` so they can still seed accounts.
   let callerRole: string | null | undefined;
   try {
     const session = await auth.api.getSession({ headers });
@@ -266,71 +227,17 @@ async function handleCreateOrganizationMember(
     if (createdUserId !== null) {
       cleanupSucceeded = await rollbackCreatedUser(createdUserId, headers);
     }
-    const message = getErrorMessage(error, "Failed to create organization member");
+    const message = getErrorMessage(
+      error,
+      "Failed to create organization member",
+    );
     return jsonResponse(getStatusCode(error), {
       error: {
-        message: createdUserId === null || cleanupSucceeded
-          ? message
-          : `${message}. The user account was created and must be removed manually.`,
+        message:
+          createdUserId === null || cleanupSucceeded
+            ? message
+            : `${message}. The user account was created and must be removed manually.`,
       },
     });
   }
 }
-
-const server = createServer(async (req, res) => {
-  try {
-    const canonicalRedirect = getCanonicalHostRedirect(req);
-    if (canonicalRedirect) {
-      res.statusCode = 308;
-      res.setHeader("Location", canonicalRedirect);
-      res.end();
-      return;
-    }
-
-    const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
-    if (req.method === "GET" && url.pathname === "/api/bootstrap-status") {
-      res.statusCode = 200;
-      res.setHeader("Cache-Control", "no-store");
-      res.setHeader("Content-Type", "application/json; charset=utf-8");
-      res.end(JSON.stringify(readBootstrapStatus(db)));
-      return;
-    }
-    if (req.method === "POST" && url.pathname === "/api/auth/organization/create-member") {
-      const webRes = await handleCreateOrganizationMember(req);
-      await sendWebResponse(webRes, res);
-      return;
-    }
-    if (url.pathname === "/api/bookings" || /^\/api\/bookings\/\d+$/.test(url.pathname)) {
-      const webRes = await handleBookings(req, url);
-      await sendWebResponse(webRes, res);
-      return;
-    }
-    if (url.pathname.startsWith("/api/auth/")) {
-      const webRes = await auth.handler(toWebRequest(req, PORT));
-      await sendWebResponse(webRes, res);
-      return;
-    }
-    if (req.method === "GET" || req.method === "HEAD") {
-      if (serveStatic(req, res, DIST_DIR)) return;
-    }
-    res.statusCode = 404;
-    res.end("Not Found");
-  } catch (err) {
-    console.error("[server] unhandled error", err);
-    if (!res.headersSent) res.statusCode = 500;
-    res.end("Internal Server Error");
-  }
-});
-
-try {
-  const { runMigrations } = await getMigrations(authOptions);
-  await runMigrations();
-  runBookingsMigrations(db);
-} catch (err) {
-  console.error("[server] failed to run auth migrations", err);
-  process.exit(1);
-}
-
-server.listen(PORT, () => {
-  console.log(`cozycasa server listening on http://localhost:${PORT}`);
-});

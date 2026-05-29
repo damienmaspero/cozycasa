@@ -1,5 +1,6 @@
+"use client";
+
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { nightWord, useLanguage } from "./i18n";
 import {
   DATE_INPUT_PATTERN,
@@ -138,132 +139,118 @@ export default function BookingModal({
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={{ gap: 12 }}
-      keyboardShouldPersistTaps="handled"
-    >
-      <Text style={styles.h2}>{isEdit ? T.edit_booking : T.new_booking}</Text>
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <h2 style={styles.h2}>{isEdit ? T.edit_booking : T.new_booking}</h2>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>{T.check_in_date}</Text>
+      <div style={styles.formGroup}>
+        <label style={styles.label}>{T.check_in_date}</label>
         <DateField
           value={checkIn}
           onChange={setCheckIn}
           invalid={!DATE_INPUT_PATTERN.test(checkIn)}
         />
-      </View>
+      </div>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>{T.check_out_date}</Text>
+      <div style={styles.formGroup}>
+        <label style={styles.label}>{T.check_out_date}</label>
         <DateField
           value={checkOut}
           onChange={setCheckOut}
           minimumDate={checkOutMinimumDate}
           invalid={!DATE_INPUT_PATTERN.test(checkOut)}
         />
-      </View>
+      </div>
 
-      <View style={styles.capacityInfo}>
+      <div style={styles.capacityInfo}>
         {capacityInfo.kind === "invalid" && (
-          <Text style={styles.error}>{T.check_out_must_be_after}</Text>
+          <span style={styles.error}>{T.check_out_must_be_after}</span>
         )}
         {capacityInfo.kind === "request" && (
           <>
-            <Text style={styles.bold}>
+            <span style={styles.bold}>
               {capacityInfo.nights} {nightWord(capacityInfo.nights, lang)}
-            </Text>
-            <Text style={styles.info}>
+            </span>
+            <span style={styles.info}>
               {T.request_mode_capacity_not_checked}
-            </Text>
+            </span>
           </>
         )}
         {capacityInfo.kind === "ok" && (
           <>
-            <Text style={styles.bold}>
+            <span style={styles.bold}>
               {capacityInfo.nights} {nightWord(capacityInfo.nights, lang)}
-            </Text>
-            <Text>
-              <Text style={styles.bold}>{T.available_spots}:</Text>{" "}
+            </span>
+            <span>
+              <span style={styles.bold}>{T.available_spots}:</span>{" "}
               {capacityInfo.max}/{HOUSE_CAPACITY} ({T.minimum_across_all_nights})
-            </Text>
+            </span>
           </>
         )}
         {capacityInfo.kind === "full" && (
           <>
-            <Text style={styles.bold}>
+            <span style={styles.bold}>
               {capacityInfo.nights} {nightWord(capacityInfo.nights, lang)}
-            </Text>
-            <Text style={styles.error}>{T.no_spots_available}</Text>
+            </span>
+            <span style={styles.error}>{T.no_spots_available}</span>
           </>
         )}
-      </View>
+      </div>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>{T.name}</Text>
-        <TextInput
+      <div style={styles.formGroup}>
+        <label style={styles.label}>{T.name}</label>
+        <input
           style={styles.input}
           value={name}
-          onChangeText={setName}
+          onChange={(e) => setName(e.target.value)}
           placeholder={T.name_placeholder}
         />
-      </View>
+      </div>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>{T.number_of_guests}</Text>
-        <TextInput
+      <div style={styles.formGroup}>
+        <label style={styles.label}>{T.number_of_guests}</label>
+        <input
           style={styles.input}
           value={guests}
-          onChangeText={(text) =>
-            setGuests(text.replace(/[^0-9]/g, "").slice(0, 2))
+          onChange={(e) =>
+            setGuests(e.target.value.replace(/[^0-9]/g, "").slice(0, 2))
           }
           placeholder={T.guests_placeholder}
-          keyboardType="number-pad"
+          inputMode="numeric"
         />
-      </View>
+      </div>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>{T.comment_optional}</Text>
-        <TextInput
-          style={[styles.input, styles.textarea]}
+      <div style={styles.formGroup}>
+        <label style={styles.label}>{T.comment_optional}</label>
+        <textarea
+          style={{ ...styles.input, ...styles.textarea }}
           value={comment}
-          onChangeText={setComment}
+          onChange={(e) => setComment(e.target.value)}
           placeholder={T.comment_placeholder}
-          multiline
-          numberOfLines={3}
+          rows={3}
         />
-      </View>
+      </div>
 
-      <Pressable
-        style={styles.checkboxRow}
-        onPress={() => setIsRequest((v) => !v)}
-      >
-        <View style={[styles.checkbox, isRequest && styles.checkboxChecked]}>
-          {isRequest && <Text style={styles.checkboxTick}>✓</Text>}
-        </View>
-        <Text style={styles.label}>{T.save_as_request}</Text>
-      </Pressable>
+      <label style={styles.checkboxRow}>
+        <input
+          type="checkbox"
+          checked={isRequest}
+          onChange={(e) => setIsRequest(e.target.checked)}
+        />
+        <span style={styles.label}>{T.save_as_request}</span>
+      </label>
 
-      <View style={styles.modalActions}>
-        <Pressable
-          onPress={onClose}
-          style={({ pressed }) => [
-            styles.btn,
-            styles.btnSecondary,
-            pressed && styles.btnPressed,
-          ]}
+      <div style={styles.modalActions}>
+        <button
+          type="button"
+          onClick={onClose}
+          style={{ ...styles.btn, ...styles.btnSecondary }}
         >
-          <Text style={styles.btnText}>{T.cancel}</Text>
-        </Pressable>
-        <Pressable
-          onPress={handleSubmit}
-          style={({ pressed }) => [
-            styles.btn,
-            pressed && styles.btnPressed,
-          ]}
-        >
-          <Text style={styles.btnText}>{isEdit ? T.update : T.book}</Text>
-        </Pressable>
-      </View>
-    </ScrollView>
+          <span style={styles.btnText}>{T.cancel}</span>
+        </button>
+        <button type="button" onClick={handleSubmit} style={styles.btn}>
+          <span style={styles.btnText}>{isEdit ? T.update : T.book}</span>
+        </button>
+      </div>
+    </div>
   );
 }

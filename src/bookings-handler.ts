@@ -1,4 +1,3 @@
-import { type IncomingMessage } from "node:http";
 import { auth } from "./auth.ts";
 import { db } from "./db.ts";
 import {
@@ -21,33 +20,15 @@ function jsonResponse(status: number, body: unknown): Response {
   });
 }
 
-function toWebHeaders(headers: IncomingMessage["headers"]): Headers {
-  const result = new Headers();
-  for (const [name, value] of Object.entries(headers)) {
-    if (Array.isArray(value)) {
-      for (const v of value) result.append(name, v);
-    } else if (value !== undefined) {
-      result.set(name, value);
-    }
-  }
-  return result;
-}
-
-async function readJSONBody(req: IncomingMessage): Promise<unknown> {
-  const chunks: Buffer[] = [];
-  let size = 0;
-  for await (const chunk of req) {
-    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-    size += buffer.length;
-    if (size > JSON_BODY_LIMIT_BYTES) {
-      throw new Error(`Request body too large`);
-    }
-    chunks.push(buffer);
-  }
-  if (chunks.length === 0) {
+async function readJSONBody(req: Request): Promise<unknown> {
+  const text = await req.text();
+  if (text.length === 0) {
     throw new Error("Request body cannot be empty");
   }
-  return JSON.parse(Buffer.concat(chunks).toString("utf8")) as unknown;
+  if (Buffer.byteLength(text, "utf8") > JSON_BODY_LIMIT_BYTES) {
+    throw new Error("Request body too large");
+  }
+  return JSON.parse(text) as unknown;
 }
 
 // Returns the organizationId from the `organizationId` query param when the
@@ -78,11 +59,9 @@ async function resolveOrganizationId(
   return { ok: true, organizationId: requested };
 }
 
-export async function handleBookings(
-  req: IncomingMessage,
-  url: URL,
-): Promise<Response> {
-  const headers = toWebHeaders(req.headers);
+export async function handleBookings(req: Request): Promise<Response> {
+  const url = new URL(req.url);
+  const headers = req.headers;
   const orgResolution = await resolveOrganizationId(url, headers);
   if (!orgResolution.ok) {
     return jsonResponse(orgResolution.status, { error: orgResolution.message });

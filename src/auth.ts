@@ -5,22 +5,17 @@ import { db } from "./db.ts";
 import { buildCorsHeaders } from "./auth-cors.ts";
 import { assertSignUpAllowedForUserCount } from "./auth-signup-gate.ts";
 
-// Origins trusted by better-auth in addition to `baseURL`. We add the native
-// deep-link scheme (matches `expo.scheme` in app.json) and the Expo / Metro web
-// dev server so that requests from iOS/Android and the Expo web bundler are
-// accepted by better-auth's origin check. Additional origins can be supplied
-// via the `BETTER_AUTH_TRUSTED_ORIGINS` env var (handled by better-auth).
+// Origins trusted by better-auth in addition to `baseURL`. The app is a
+// web-only Next.js application, so we trust the production web domains and the
+// local Next.js dev server. Additional origins can be supplied via the
+// `BETTER_AUTH_TRUSTED_ORIGINS` env var (handled by better-auth).
 export const TRUSTED_ORIGINS = [
   // Production web domains.
   "https://www.thecozycasa.net",
   "https://thecozycasa.net",
-  // Native deep-link scheme.
-  "cozycasa://",
-  // Expo Go / dev client deep links.
-  "exp://",
-  // Expo / Metro web dev server.
-  "http://localhost:8081",
-  "http://127.0.0.1:8081",
+  // Next.js dev server.
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
 ];
 
 export const authOptions: BetterAuthOptions = {
@@ -50,16 +45,15 @@ export const authOptions: BetterAuthOptions = {
       const userCount = await ctx.context.adapter.count({ model: "user" });
       assertSignUpAllowedForUserCount(userCount);
     }),
-    // Add CORS response headers for trusted origins so the Expo web bundler
-    // (and any other allowed cross-origin client) can call the auth API
-    // without modifying `src/server.ts` request handling. Native iOS/Android
-    // do not enforce CORS, but echoing these headers is harmless for them.
+    // Add CORS response headers for trusted origins. The app is normally
+    // served same-origin by Next.js, so CORS is not required for the first
+    // party UI, but echoing these headers for trusted origins keeps any
+    // cross-origin client (e.g. a future companion site) working without
+    // changing route handlers.
     //
     // Note: this only attaches CORS headers to actual auth endpoint responses.
-    // CORS preflight (OPTIONS) handling is intentionally out of scope for
-    // this PR — the migration plan forbids changes to `src/server.ts`
-    // request handling, and native clients (the target of this PR) do not
-    // issue preflight requests.
+    // CORS preflight (OPTIONS) handling is out of scope here; the first-party
+    // web UI is same-origin and does not issue preflight requests.
     after: createAuthMiddleware(async (ctx) => {
       const origin = ctx.request?.headers.get("origin") ?? null;
       const isTrusted = origin
