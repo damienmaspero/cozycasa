@@ -225,7 +225,7 @@ const FR: Dictionary = {
     "Décembre",
   ],
   weekdays_short: ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"],
-  guests_short: "personnes",
+  guests_short: "pers.",
   request_short: "demande",
   request_label: "demande",
   request_badge: "DEMANDE",
@@ -245,7 +245,7 @@ const FR: Dictionary = {
   confirm: "Confirmer",
   bookings: "Réservations",
   capacity: "Capacité",
-  people: "personnes",
+  people: "pers.",
   spots_remaining: "place(s) restante(s)",
   requests: "Demandes",
   persons_requesting: "personne(s) en demande",
@@ -254,7 +254,7 @@ const FR: Dictionary = {
   check_in_date: "Date d’arrivée",
   check_out_date: "Date de départ",
   name_placeholder: "Votre nom",
-  number_of_guests: "Nombre de personnes",
+  number_of_guests: "Nombre de pers.",
   guests_placeholder: "ex. 4",
   comment_optional: "Commentaire (facultatif)",
   comment_placeholder: "Ajouter un commentaire...",
@@ -359,7 +359,7 @@ export function nightWord(n: number, lang: Lang = "fr"): string {
 }
 
 export function personWord(n: number, lang: Lang = "fr"): string {
-  if (lang === "fr") return n > 1 ? "personnes" : "personne";
+  if (lang === "fr") return n > 1 ? "pers." : "personne";
   return n > 1 ? "people" : "person";
 }
 
