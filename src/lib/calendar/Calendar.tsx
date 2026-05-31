@@ -30,16 +30,12 @@ function buildCells(year: number, month: number): Cell[] {
 export interface CalendarProps {
   currentMonth: Date;
   bookings: Booking[];
-  onPrev: () => void;
-  onNext: () => void;
   onSelectDate: (dateStr: string) => void;
 }
 
 export default function Calendar({
   currentMonth,
   bookings,
-  onPrev,
-  onNext,
   onSelectDate,
 }: CalendarProps) {
   const T = useT();
@@ -65,30 +61,6 @@ export default function Calendar({
 
   return (
     <View>
-      <View style={styles.calendarControls}>
-        <Pressable
-          onPress={onPrev}
-          style={({ pressed }) => [
-            styles.btn,
-            styles.btnNav,
-            pressed && styles.btnPressed,
-          ]}
-        >
-          <Text style={styles.btnNavText}>{T.previous}</Text>
-        </Pressable>
-        <Text style={styles.currentMonth}>{`${T.months[month]} ${year}`}</Text>
-        <Pressable
-          onPress={onNext}
-          style={({ pressed }) => [
-            styles.btn,
-            styles.btnNav,
-            pressed && styles.btnPressed,
-          ]}
-        >
-          <Text style={styles.btnNavText}>{T.next}</Text>
-        </Pressable>
-      </View>
-
       <View style={styles.weekRow}>
         {T.weekdays_short.map((w) => (
           <View key={w} style={styles.weekCell}>
