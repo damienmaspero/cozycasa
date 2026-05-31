@@ -158,6 +158,15 @@ const EN = {
     "You aren’t a member of any organization yet.",
   not_member_of_that_org:
     "You are not a member of that organization.",
+
+  // Active organization
+  active_organization: "Active organization",
+  active_organization_hint:
+    "The calendar and upcoming bookings show data for this organization.",
+  active_badge: "Active",
+  set_as_active: "Set as active",
+  no_active_organization:
+    "No active organization — choose one on the Account page.",
 };
 
 export type Dictionary = typeof EN;
@@ -289,6 +298,15 @@ const FR: Dictionary = {
     "Vous n’êtes encore membre d’aucune organisation.",
   not_member_of_that_org:
     "Vous n’êtes pas membre de cette organisation.",
+
+  // Active organization
+  active_organization: "Organisation active",
+  active_organization_hint:
+    "Le calendrier et les réservations à venir affichent les données de cette organisation.",
+  active_badge: "Active",
+  set_as_active: "Définir comme active",
+  no_active_organization:
+    "Aucune organisation active — choisissez-en une dans Compte.",
 };
 
 const DICTIONARIES: Record<Lang, Dictionary> = { en: EN, fr: FR };

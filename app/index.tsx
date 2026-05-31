@@ -1,5 +1,4 @@
-import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -24,8 +23,8 @@ import {
   useLanguage,
   useT,
 } from "@/src/lib/calendar/i18n";
+import { useActiveOrg } from "@/src/lib/useActiveOrg";
 
-type Org = { id: string; name: string; slug: string };
 type BootstrapStatus = { signUpAllowed: boolean };
 
 function resolveBootstrapStatusURL(): string | null {
@@ -319,32 +318,12 @@ function SignedIn({ label, role }: { label: string; role?: string | null }) {
 }
 
 function Organizations({ isAdmin }: { isAdmin: boolean }) {
-  const router = useRouter();
   const T = useT();
-  const [orgs, setOrgs] = useState<Org[]>([]);
+  const { orgs, activeOrgId, setActiveOrg } = useActiveOrg();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-
-  const reload = useCallback(async () => {
-    const res = await organization.list();
-    if (res.data) setOrgs(res.data as Org[]);
-    return res.data ? (res.data as Org[]) : null;
-  }, []);
-
-  useEffect(() => {
-    async function init() {
-      const loaded = await reload();
-      if (!isAdmin && loaded && loaded.length === 1 && loaded[0]) {
-        router.replace({
-          pathname: "/calendar",
-          params: { org: loaded[0].id },
-        });
-      }
-    }
-    void init();
-  }, [isAdmin, reload, router]);
 
   async function onCreate() {
     setError(null);
@@ -359,7 +338,6 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
       } else {
         setName("");
         setSlug("");
-        await reload();
       }
     } finally {
       setBusy(false);
@@ -368,39 +346,48 @@ function Organizations({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <View style={styles.section}>
-      <Text style={styles.h2}>{T.organizations}</Text>
-      {orgs.length === 0 ? (
+      <Text style={styles.h2}>{T.active_organization}</Text>
+      <Text style={styles.muted}>{T.active_organization_hint}</Text>
+      {orgs === null ? (
+        <ActivityIndicator />
+      ) : orgs.length === 0 ? (
         <Text style={styles.muted}>{T.no_organizations_yet}</Text>
       ) : (
         <View style={styles.orgList}>
-          {orgs.map((o) => (
-            <View key={o.id} style={styles.orgItem}>
-              <Text>
-                {o.name} <Text style={styles.code}>({o.slug})</Text>
-              </Text>
-              <Pressable
-                accessibilityRole="link"
-                onPress={() => {
-                  router.push({
-                    pathname: "/calendar",
-                    params: { org: o.id },
-                  });
-                }}
-                style={({ pressed }) => [
-                  styles.button,
-                  pressed && styles.buttonPressed,
-                ]}
-              >
-                <Text style={styles.buttonText}>{T.open_calendar}</Text>
-              </Pressable>
-              {isAdmin && (
-                <CreateOrganizationMember
-                  organizationId={o.id}
-                  organizationName={o.name}
-                />
-              )}
-            </View>
-          ))}
+          {orgs.map((o) => {
+            const isActive = o.id === activeOrgId;
+            return (
+              <View key={o.id} style={styles.orgItem}>
+                <Pressable
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: isActive }}
+                  onPress={() => {
+                    if (!isActive) void setActiveOrg(o.id);
+                  }}
+                  style={({ pressed }) => [
+                    styles.orgOption,
+                    isActive && styles.orgOptionSelected,
+                    pressed && styles.buttonPressed,
+                  ]}
+                >
+                  <Text style={styles.orgOptionText}>
+                    {o.name} <Text style={styles.code}>({o.slug})</Text>
+                  </Text>
+                  {isActive ? (
+                    <Text style={styles.activeBadge}>{T.active_badge}</Text>
+                  ) : (
+                    <Text style={styles.link}>{T.set_as_active}</Text>
+                  )}
+                </Pressable>
+                {isAdmin && (
+                  <CreateOrganizationMember
+                    organizationId={o.id}
+                    organizationName={o.name}
+                  />
+                )}
+              </View>
+            );
+          })}
         </View>
       )}
       {isAdmin && (
@@ -646,6 +633,26 @@ const styles = StyleSheet.create({
   link: { color: "#0070f3", marginTop: 4 },
   orgList: { gap: 16 },
   orgItem: { gap: 8 },
+  orgOption: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    backgroundColor: "#fff",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  orgOptionSelected: { borderColor: "#0070f3", backgroundColor: "#eef5ff" },
+  orgOptionText: { flexShrink: 1 },
+  activeBadge: {
+    color: "#0070f3",
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+  },
   roleRow: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
   roleChip: {
     borderWidth: 1,
