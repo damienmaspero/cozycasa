@@ -26,7 +26,7 @@ export default function UpcomingRoute() {
       <View style={[styles.container, styles.content]}>
         <Text style={styles.h2}>{T.please_sign_in}</Text>
         <Pressable
-          onPress={() => router.replace("/")}
+          onPress={() => router.replace("/account")}
           style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
         >
           <Text style={styles.btnText}>{T.back}</Text>
@@ -44,7 +44,7 @@ export default function UpcomingRoute() {
           <>
             <Text style={styles.muted}>{T.no_active_organization}</Text>
             <Pressable
-              onPress={() => router.replace("/")}
+              onPress={() => router.replace("/account")}
               style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
             >
               <Text style={styles.btnText}>{T.menu_account}</Text>
