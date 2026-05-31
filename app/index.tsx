@@ -1,4 +1,4 @@
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -50,7 +50,6 @@ export default function Index() {
 
   return (
     <>
-      <Stack.Screen options={{ title: T.cozy_casa }} />
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
