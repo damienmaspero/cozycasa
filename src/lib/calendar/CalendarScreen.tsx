@@ -8,7 +8,6 @@ import {
 } from "react-native";
 import BookingModal from "./BookingModal";
 import Calendar from "./Calendar";
-import BookingsList from "./BookingsList";
 import DayDetailsModal from "./DayDetailsModal";
 import { useBookings } from "./useBookings";
 import { formatDate, parseLocalDate } from "./dates";
@@ -131,13 +130,6 @@ export default function CalendarScreen({ organizationId }: CalendarScreenProps) 
             )
           }
           onSelectDate={selectDate}
-        />
-
-        <BookingsList
-          bookings={bookings}
-          onEdit={startEdit}
-          onDelete={handleDelete}
-          onConfirm={handleConfirm}
         />
 
         <View style={{ height: 80 }} />

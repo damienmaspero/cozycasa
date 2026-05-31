@@ -67,6 +67,7 @@ const EN = {
   // Navigation drawer
   menu_home: "Home",
   menu_calendar: "Calendar",
+  menu_upcoming: "Upcoming bookings",
 
   // Calendar
   booking_calendar: "Booking calendar",
@@ -203,6 +204,7 @@ const FR: Dictionary = {
   // Navigation drawer
   menu_home: "Accueil",
   menu_calendar: "Calendrier",
+  menu_upcoming: "Réservations à venir",
 
   // Calendar
   booking_calendar: "Calendrier des réservations",
