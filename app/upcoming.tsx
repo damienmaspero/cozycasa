@@ -27,6 +27,15 @@ export default function UpcomingRoute() {
     };
   }, [session?.user]);
 
+  // When the user belongs to exactly one organization there is nothing to
+  // choose, so skip the picker and open that household directly.
+  useEffect(() => {
+    if (params.org) return;
+    if (orgs && orgs.length === 1 && orgs[0]) {
+      router.replace(`/upcoming?org=${orgs[0].id}`);
+    }
+  }, [orgs, params.org, router]);
+
   if (isPending) {
     return (
       <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
@@ -56,7 +65,7 @@ export default function UpcomingRoute() {
     return (
       <View style={[styles.container, styles.content]}>
         <Text style={styles.h2}>{T.choose_a_household}</Text>
-        {orgs === null ? (
+        {orgs === null || orgs.length === 1 ? (
           <ActivityIndicator />
         ) : orgs.length === 0 ? (
           <Text style={styles.muted}>{T.not_member_of_any_org}</Text>
