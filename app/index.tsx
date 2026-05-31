@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -130,6 +131,7 @@ function AuthForms() {
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const router = useRouter();
   const T = useT();
 
   const isSignUp = mode === "signup";
@@ -182,7 +184,11 @@ function AuthForms() {
         if (res.error) setError(res.error.message ?? T.sign_up_failed);
       } else {
         const res = await signIn.username({ username, password });
-        if (res.error) setError(res.error.message ?? T.sign_in_failed);
+        if (res.error) {
+          setError(res.error.message ?? T.sign_in_failed);
+        } else {
+          router.replace("/upcoming");
+        }
       }
     } finally {
       setBusy(false);
