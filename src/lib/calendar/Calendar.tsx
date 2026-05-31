@@ -134,9 +134,7 @@ export default function Calendar({
                     </View>
                   ))}
                   {allDay.length > 2 && (
-                    <Text style={styles.bookingMore}>
-                      +{allDay.length - 2} {T.others}
-                    </Text>
+                    <Text style={styles.bookingMore}>...</Text>
                   )}
                   <Text style={styles.capacityLine}>
                     {totalGuests}/{HOUSE_CAPACITY} {T.guests_short}
