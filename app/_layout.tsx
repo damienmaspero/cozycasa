@@ -8,7 +8,7 @@ function DrawerNavigator() {
     <Drawer>
       <Drawer.Screen
         name="index"
-        options={{ drawerLabel: T.menu_home, title: T.cozy_casa }}
+        options={{ drawerLabel: T.menu_account, title: T.cozy_casa }}
       />
       <Drawer.Screen
         name="calendar"
