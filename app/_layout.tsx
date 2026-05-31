@@ -7,8 +7,12 @@ function DrawerNavigator() {
   return (
     <Drawer>
       <Drawer.Screen
-        name="index"
+        name="account"
         options={{ drawerLabel: T.menu_account, title: T.cozy_casa }}
+      />
+      <Drawer.Screen
+        name="index"
+        options={{ drawerItemStyle: { display: "none" }, title: T.cozy_casa }}
       />
       <Drawer.Screen
         name="calendar"
