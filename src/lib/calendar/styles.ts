@@ -60,14 +60,11 @@ export const styles = StyleSheet.create({
   btnDisabled: { opacity: 0.5 },
   btnPressed: { opacity: 0.85 },
 
+  // Drawer header month navigation
+  headerMonth: { fontSize: 18, fontWeight: "700", color: colors.text },
+  headerNav: { flexDirection: "row", alignItems: "center", gap: 8, marginRight: 12 },
+
   // Calendar grid
-  calendarControls: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 8,
-  },
-  currentMonth: { fontSize: 18, fontWeight: "700", color: colors.text },
   weekRow: { flexDirection: "row" },
   weekCell: {
     flex: 1,

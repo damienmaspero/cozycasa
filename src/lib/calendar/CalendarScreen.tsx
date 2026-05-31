@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react";
+import { useCallback, useLayoutEffect, useState } from "react";
+import { useNavigation } from "expo-router";
 import {
   Modal,
   Pressable,
@@ -28,6 +29,7 @@ export interface CalendarScreenProps {
 
 export default function CalendarScreen({ organizationId }: CalendarScreenProps) {
   const { lang, t: T } = useLanguage();
+  const navigation = useNavigation();
   const { bookings, save, remove, confirm } = useBookings(organizationId);
 
   const [currentMonth, setCurrentMonth] = useState<Date>(() => {
@@ -37,6 +39,55 @@ export default function CalendarScreen({ organizationId }: CalendarScreenProps) 
   const [modal, setModal] = useState<ModalState>(null);
 
   const closeModal = useCallback(() => setModal(null), []);
+
+  const goPrev = useCallback(
+    () =>
+      setCurrentMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1)),
+    [],
+  );
+  const goNext = useCallback(
+    () =>
+      setCurrentMonth((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1)),
+    [],
+  );
+
+  // Merge the month navigation into the drawer header so it shares a single row
+  // with the hamburger menu instead of occupying a second bar below it.
+  useLayoutEffect(() => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    navigation.setOptions({
+      headerTitle: () => (
+        <Text style={styles.headerMonth}>{`${T.months[month]} ${year}`}</Text>
+      ),
+      headerRight: () => (
+        <View style={styles.headerNav}>
+          <Pressable
+            onPress={goPrev}
+            accessibilityLabel={T.previous}
+            style={({ pressed }) => [
+              styles.btn,
+              styles.btnNav,
+              pressed && styles.btnPressed,
+            ]}
+          >
+            <Text style={styles.btnNavText}>{T.previous}</Text>
+          </Pressable>
+          <Pressable
+            onPress={goNext}
+            accessibilityLabel={T.next}
+            style={({ pressed }) => [
+              styles.btn,
+              styles.btnNav,
+              pressed && styles.btnPressed,
+            ]}
+          >
+            <Text style={styles.btnNavText}>{T.next}</Text>
+          </Pressable>
+        </View>
+      ),
+    });
+  }, [navigation, currentMonth, T, goPrev, goNext]);
 
   const openNewBooking = useCallback(() => {
     const today = new Date();
@@ -119,16 +170,6 @@ export default function CalendarScreen({ organizationId }: CalendarScreenProps) 
         <Calendar
           currentMonth={currentMonth}
           bookings={bookings}
-          onPrev={() =>
-            setCurrentMonth(
-              (d) => new Date(d.getFullYear(), d.getMonth() - 1, 1),
-            )
-          }
-          onNext={() =>
-            setCurrentMonth(
-              (d) => new Date(d.getFullYear(), d.getMonth() + 1, 1),
-            )
-          }
           onSelectDate={selectDate}
         />
 
