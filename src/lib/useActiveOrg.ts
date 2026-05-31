@@ -3,7 +3,9 @@ import {
   organization,
   useActiveOrganization,
   useListOrganizations,
+  useSession,
 } from "@/src/lib/auth-client";
+import { shouldRefetchOrgsOnUserChange } from "@/src/org-refresh";
 
 export type Org = { id: string; name: string; slug: string };
 
@@ -34,8 +36,30 @@ export interface UseActiveOrgResult {
  * reloads and is shared by every screen (web and native alike).
  */
 export function useActiveOrg(enabled: boolean = true): UseActiveOrgResult {
-  const { data: list, isPending: listPending } = useListOrganizations();
-  const { data: active, isPending: activePending } = useActiveOrganization();
+  const { data: session } = useSession();
+  const userId = (session?.user as { id?: string } | undefined)?.id ?? null;
+  const {
+    data: list,
+    isPending: listPending,
+    refetch: refetchList,
+  } = useListOrganizations();
+  const {
+    data: active,
+    isPending: activePending,
+    refetch: refetchActive,
+  } = useActiveOrganization();
+
+  // Self-heal stale caches when the signed-in user changes. The better-auth
+  // org/active-org queries are not invalidated on sign-in/sign-out, so without
+  // this the new user would keep seeing the previous user's organizations (see
+  // `shouldRefetchOrgsOnUserChange`).
+  const lastUserIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!shouldRefetchOrgsOnUserChange(lastUserIdRef.current, userId)) return;
+    lastUserIdRef.current = userId;
+    void refetchList?.();
+    void refetchActive?.();
+  }, [userId, refetchList, refetchActive]);
 
   const orgs = useMemo<Org[] | null>(
     () => (list ? (list as Org[]) : null),
