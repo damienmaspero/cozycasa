@@ -65,7 +65,7 @@ const EN = {
   language: "Language",
 
   // Navigation drawer
-  menu_home: "Home",
+  menu_account: "Account",
   menu_calendar: "Calendar",
 
   // Calendar
@@ -201,7 +201,7 @@ const FR: Dictionary = {
   language: "Langue",
 
   // Navigation drawer
-  menu_home: "Accueil",
+  menu_account: "Compte",
   menu_calendar: "Calendrier",
 
   // Calendar
