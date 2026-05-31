@@ -84,7 +84,7 @@ export const styles = StyleSheet.create({
   },
   cell: {
     width: `${100 / 7}%`,
-    minHeight: 88,
+    minHeight: 92,
     borderRightWidth: 1,
     borderBottomWidth: 1,
     borderColor: colors.border,
@@ -108,10 +108,10 @@ export const styles = StyleSheet.create({
   bookingMiniRequest: {
     backgroundColor: colors.request,
   },
-  bookingMiniText: { color: "#fff", fontSize: 10 },
-  bookingMiniRequestText: { color: colors.requestText, fontSize: 10 },
-  bookingMore: { fontSize: 10, color: colors.muted, marginTop: 2 },
-  capacityLine: { fontSize: 10, color: colors.muted, marginTop: 2 },
+  bookingMiniText: { color: "#fff", fontSize: 11 },
+  bookingMiniRequestText: { color: colors.requestText, fontSize: 11 },
+  bookingMore: { fontSize: 11, color: colors.muted, marginTop: 2 },
+  capacityLine: { fontSize: 11, color: colors.muted, marginTop: 2 },
 
   // Bookings list
   bookingItem: {
