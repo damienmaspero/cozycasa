@@ -113,24 +113,7 @@ export default function CalendarRoute() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: selectedOrg?.name ?? T.app_title,
-          headerLeft: () => (
-            <Pressable
-              onPress={() => router.replace("/")}
-              style={({ pressed }) => [
-                { paddingHorizontal: 8 },
-                pressed && styles.btnPressed,
-              ]}
-            >
-              <Text style={{ color: "#2563eb", fontWeight: "600" }}>
-                {T.back}
-              </Text>
-            </Pressable>
-          ),
-        }}
-      />
+      <Stack.Screen options={{ headerShown: false }} />
       <CalendarScreen
         organizationId={selectedOrgId}
       />

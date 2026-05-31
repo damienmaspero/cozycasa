@@ -65,7 +65,6 @@ export default function Calendar({
 
   return (
     <View>
-      <Text style={styles.h2}>{T.booking_calendar}</Text>
       <View style={styles.calendarControls}>
         <Pressable
           onPress={onPrev}

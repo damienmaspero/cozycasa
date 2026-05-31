@@ -117,10 +117,6 @@ export default function CalendarScreen({ organizationId }: CalendarScreenProps) 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.h1}>{T.app_title}</Text>
-        </View>
-
         <Calendar
           currentMonth={currentMonth}
           bookings={bookings}
