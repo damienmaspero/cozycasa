@@ -1,4 +1,4 @@
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import CalendarScreen from "@/src/lib/calendar/CalendarScreen";
@@ -38,7 +38,6 @@ export default function CalendarRoute() {
   if (!session?.user) {
     return (
       <View style={[styles.container, styles.content]}>
-        <Stack.Screen options={{ title: T.app_title }} />
         <Text style={styles.h2}>{T.please_sign_in}</Text>
         <Pressable
           onPress={() => router.replace("/")}
@@ -56,7 +55,6 @@ export default function CalendarRoute() {
   if (!selectedOrgId) {
     return (
       <View style={[styles.container, styles.content]}>
-        <Stack.Screen options={{ title: T.app_title }} />
         <Text style={styles.h2}>{T.choose_a_household}</Text>
         {orgs === null ? (
           <ActivityIndicator />
@@ -97,7 +95,6 @@ export default function CalendarRoute() {
   if (orgs && !selectedOrg) {
     return (
       <View style={[styles.container, styles.content]}>
-        <Stack.Screen options={{ title: T.app_title }} />
         <Text style={styles.error}>
           {T.not_member_of_that_org}
         </Text>
@@ -112,11 +109,8 @@ export default function CalendarRoute() {
   }
 
   return (
-    <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <CalendarScreen
-        organizationId={selectedOrgId}
-      />
-    </>
+    <CalendarScreen
+      organizationId={selectedOrgId}
+    />
   );
 }

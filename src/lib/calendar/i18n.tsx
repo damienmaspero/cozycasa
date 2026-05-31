@@ -64,6 +64,10 @@ const EN = {
     "Network error or unexpected response — please try again",
   language: "Language",
 
+  // Navigation drawer
+  menu_home: "Home",
+  menu_calendar: "Calendar",
+
   // Calendar
   booking_calendar: "Booking calendar",
   previous: "‹ Previous",
@@ -195,6 +199,10 @@ const FR: Dictionary = {
   network_error_try_again:
     "Erreur réseau ou réponse inattendue — veuillez réessayer",
   language: "Langue",
+
+  // Navigation drawer
+  menu_home: "Accueil",
+  menu_calendar: "Calendrier",
 
   // Calendar
   booking_calendar: "Calendrier des réservations",
