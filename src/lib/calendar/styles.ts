@@ -96,7 +96,7 @@ export const styles = StyleSheet.create({
   cellBooked: { backgroundColor: colors.booked },
   cellFull: { backgroundColor: colors.full },
   cellPast: { backgroundColor: colors.past },
-  dayNumber: { fontSize: 11, fontWeight: "600", color: colors.text },
+  dayNumber: { fontSize: 12, fontWeight: "600", color: colors.text },
   dayNumberPast: { color: colors.pastText },
   bookingMini: {
     backgroundColor: colors.primary,
@@ -108,10 +108,10 @@ export const styles = StyleSheet.create({
   bookingMiniRequest: {
     backgroundColor: colors.request,
   },
-  bookingMiniText: { color: "#fff", fontSize: 11 },
-  bookingMiniRequestText: { color: colors.requestText, fontSize: 11 },
-  bookingMore: { fontSize: 11, color: colors.muted, marginTop: 2 },
-  capacityLine: { fontSize: 11, color: colors.muted, marginTop: 2 },
+  bookingMiniText: { color: "#fff", fontSize: 12 },
+  bookingMiniRequestText: { color: colors.requestText, fontSize: 12 },
+  bookingMore: { fontSize: 12, color: colors.muted, marginTop: 2 },
+  capacityLine: { fontSize: 12, color: colors.muted, marginTop: 2 },
 
   // Bookings list
   bookingItem: {
@@ -132,7 +132,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 4,
   },
-  badgeText: { color: "#fff", fontSize: 10, fontWeight: "700" },
+  badgeText: { color: "#fff", fontSize: 12, fontWeight: "700" },
   actionsRow: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
 
   // Modal
