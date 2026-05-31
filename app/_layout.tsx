@@ -14,6 +14,10 @@ function DrawerNavigator() {
         name="calendar"
         options={{ drawerLabel: T.menu_calendar, title: T.app_title }}
       />
+      <Drawer.Screen
+        name="upcoming"
+        options={{ drawerLabel: T.menu_upcoming, title: T.upcoming_bookings }}
+      />
     </Drawer>
   );
 }
