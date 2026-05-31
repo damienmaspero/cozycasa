@@ -18,9 +18,7 @@ subsequent `/sign-up/email` call is rejected with the same
 `EMAIL_PASSWORD_SIGN_UP_DISABLED` error better-auth uses when sign-up is
 disabled outright.
 
-This deliberately small scope drives the operational choices below — things
-like rate limiting, complex CI matrices, staging environments, and heavy
-observability stacks are intentionally out of scope.
+This deliberately small scope drives the operational choices below.
 
 ## Stack
 
